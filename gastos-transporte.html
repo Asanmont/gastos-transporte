@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#060E1A">
+<title>Gastos Transporte</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#060E1A;color:#E2E8F0;font-family:system-ui,-apple-system,sans-serif;min-height:100svh}
+#app{max-width:500px;margin:0 auto}
+/* Header */
+.hdr{background:#060E1A;border-bottom:1px solid #0F2744;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.hdr-title{font-weight:800;font-size:1rem;color:#F1F5F9}
+.hdr-sub{color:#1E3A5F;font-size:.7rem;margin-top:1px}
+.back-btn{background:none;border:none;color:#60A5FA;font-size:1.6rem;cursor:pointer;padding:0 6px;line-height:1}
+.cfg-btn{background:none;border:none;font-size:1.3rem;cursor:pointer;padding:2px}
+.xl-hdr{background:#064E3B;border:none;color:#6EE7B7;font-size:.78rem;font-weight:800;border-radius:8px;padding:7px 11px;cursor:pointer}
+/* Content */
+.wrap{padding:16px;padding-bottom:60px}
+/* Month grid */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.mcrd{background:#0F2744;border:none;border-radius:13px;padding:15px 12px;text-align:left;cursor:pointer;width:100%}
+.mname{font-weight:800;color:#F1F5F9;font-size:1rem}
+.mn{color:#1E3A5F;font-size:.7rem;margin-top:3px}
+.mtot{color:#4ADE80;font-weight:800;font-size:.92rem;margin-top:4px}
+/* Total card */
+.tbig{background:#1D4ED8;border:none;border-radius:13px;padding:16px;width:100%;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.tbig-lbl{font-weight:800;color:#F1F5F9;font-size:1rem}
+.tbig-sub{color:#BFDBFE;font-size:.73rem;margin-top:2px}
+.tbig-amt{font-weight:800;color:#fff;font-size:1.4rem}
+/* Buttons */
+.btn{display:block;width:100%;padding:15px 12px;border-radius:11px;font-weight:700;font-size:.95rem;border:none;cursor:pointer;margin-bottom:10px;text-align:center}
+.bg{background:#16A34A;color:#fff}
+.bd{background:#0F2744;color:#93C5FD}
+.bx{background:#064E3B;color:#6EE7B7}
+/* Section */
+.sec{background:#0F2744;border-radius:13px;padding:15px;margin-bottom:10px}
+.sl{color:#475E85;font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:block}
+/* Button grid */
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sb{padding:14px 8px;border-radius:11px;font-weight:700;font-size:.9rem;border:none;cursor:pointer;background:#1E3A5F;color:#93C5FD;width:100%}
+.sb.sm{font-size:.77rem;padding:11px 6px}
+.sb.on{background:#2563EB;color:#fff;outline:2px solid #60A5FA;outline-offset:2px}
+/* Toggle */
+.tgl{width:100%;padding:13px;border-radius:10px;font-weight:700;font-size:.9rem;border:none;cursor:pointer;color:#fff;display:block;margin-bottom:10px}
+.tgl.on{background:#2563EB;outline:2px solid #60A5FA;outline-offset:2px}
+.tgl.off{background:#1E3A5F}
+/* Inputs */
+input[type=date],input[type=text],input[type=number]{width:100%;background:#1E3A5F;color:#E2E8F0;border:none;outline:none;border-radius:9px;padding:12px 14px;font-size:1rem;font-family:inherit;-moz-appearance:textfield}
+input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appearance:none}
+/* Mini summary strip */
+.msum{background:#0F2744;border-radius:13px;padding:14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.msl{color:#1E3A5F;font-size:.68rem}
+.msv{font-weight:800;color:#F1F5F9;font-size:1.4rem}
+.msv.g{color:#4ADE80;font-size:1.2rem}
+/* Km info */
+.kmi{background:#060E1A;border-radius:8px;padding:10px 12px;font-size:.81rem;color:#475E85;margin-top:10px}
+/* Summary preview */
+.sumbox{background:#0F2744;border:1px solid #1E3A5F;border-radius:13px;padding:16px;margin-bottom:12px}
+.sr{display:flex;justify-content:space-between;padding:3px 0;font-size:.85rem}
+.sk{color:#475E85}.sv{color:#E2E8F0;font-weight:600}
+.stot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1E3A5F;margin-top:10px;padding-top:10px}
+.stot-l{font-weight:800;color:#F1F5F9}
+.stot-v{font-weight:800;color:#4ADE80;font-size:1.3rem}
+/* Table */
+.twrap{overflow-x:auto;border-radius:12px;background:#0F2744;margin-bottom:12px}
+table{border-collapse:collapse;width:100%;font-size:.74rem;min-width:640px}
+th{padding:9px 6px;color:#1E3A5F;font-weight:800;text-align:left;white-space:nowrap;background:#060E1A}
+td{padding:8px 6px;border-bottom:1px solid #1E3A5F;color:#CBD5E1}
+td.r{text-align:right}
+td.c{text-align:center}
+td.g{color:#4ADE80;font-weight:800;text-align:right;white-space:nowrap}
+tfoot td{background:#060E1A;border:none;padding:9px 6px;color:#475E85;font-size:.72rem}
+.dbtn{background:none;border:none;color:#EF4444;font-size:1.1rem;cursor:pointer;padding:2px 4px}
+.ivbtn{background:none;border:none;cursor:pointer;color:#60A5FA;font-size:.9rem}
+.edbl{cursor:pointer;display:block;min-width:24px;padding:2px 0}
+.einp{width:70px;background:#1D4ED8;color:#fff;border:none;outline:none;border-radius:4px;padding:3px 5px;font-size:.74rem;font-family:inherit;-moz-appearance:textfield}
+/* Total table */
+.ttbl th{color:#1E3A5F;font-weight:800;white-space:nowrap}
+.ttbl td{padding:10px 8px;font-size:.83rem;cursor:pointer}
+.ttbl tfoot td{padding:10px 8px;font-weight:800}
+.ttbl tfoot td.g{color:#4ADE80}
+/* Config */
+.kmrow{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.kmlbl{color:#93C5FD;font-size:.78rem;flex:1}
+.kminp{width:66px;background:#1E3A5F;color:#E2E8F0;border:none;outline:none;border-radius:8px;padding:9px 8px;font-size:.9rem;text-align:right;font-family:inherit;-moz-appearance:textfield}
+.kmunit{color:#475E85;font-size:.78rem;width:22px}
+.note{color:#1E3A5F;font-size:.72rem;margin-top:8px}
+/* Toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#16A34A;color:#fff;padding:13px 28px;border-radius:13px;font-weight:800;z-index:999;font-size:.92rem;box-shadow:0 4px 24px rgba(0,0,0,.6);white-space:nowrap;pointer-events:none}
+/* Empty */
+.empty{text-align:center;padding:48px 16px;color:#1E3A5F}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+'use strict';
+
+// ── Constantes ─────────────────────────────────────────────────────────────────
+const MESES=[{id:'2026-06',label:'Junio'},{id:'2026-07',label:'Julio'},{id:'2026-08',label:'Agosto'},{id:'2026-09',label:'Septiembre'},{id:'2026-10',label:'Octubre'},{id:'2026-11',label:'Noviembre'},{id:'2026-12',label:'Diciembre'}];
+const ORIGENES=['Casa','Centro de Trabajo'];
+const DESTINOS=['Rehabilitación','Viamed Fátima','Clínica Osten','Centro Salud SAS','Fremap','Otros'];
+const MOTIVOS=['Viamed Tráfico','Viamed Pruebas','Viamed Psiquiatra','Viamed Psicología','Fremap / Mutua','Osten Perito MM','Otros'];
+const TRANSP=['Vehículo Propio','VTC / Taxi'];
+const KM_PAIRS=ORIGENES.flatMap(o=>DESTINOS.filter(d=>d!=='Otros').map(d=>({key:`${o}||${d}`,label:`${o} → ${d}`})));
+const LS_T='trips-v2',LS_C='cfg-v2';
+
+// ── Estado ─────────────────────────────────────────────────────────────────────
+const st={
+  screen:'home',selMonth:null,
+  trips:[],cfg:{rate:0.26,km:{}},
+  form:{},cfgDraft:{},
+  editCell:null,editVal:'',toast:''
+};
+const EF={fecha:'',origen:'',destino:'',km_manual:'',destino_custom:'',motivo:'',motivo_custom:'',transporte:'',vtc_importe:'',ida_vuelta:true,parking:''};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const today=()=>new Date().toISOString().slice(0,10);
+const eur=n=>`${(parseFloat(n)||0).toFixed(2).replace('.',',')} €`;
+const kmk=(o,d)=>`${o}||${d}`;
+const h=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function calcT(t,cfg){
+  const park=parseFloat(t.parking)||0;
+  if(t.transporte==='VTC / Taxi'){const v=parseFloat(t.vtc_importe)||0;return{...t,km_calc:0,importe_km:v,total:v+park};}
+  const base=t.destino==='Otros'?parseFloat(t.km_manual)||0:parseFloat((cfg.km||{})[kmk(t.origen,t.destino)])||0;
+  const km_calc=base*(t.ida_vuelta?2:1),rate=parseFloat(cfg.rate)||0.26,imp=km_calc*rate;
+  return{...t,km_calc,importe_km:imp,total:imp+park};
+}
+function byM(mid){return st.trips.filter(t=>t.fecha?.startsWith(mid));}
+function mSum(mid){
+  const ts=byM(mid).map(t=>calcT(t,st.cfg));
+  return{n:ts.length,km:ts.reduce((a,t)=>a+(t.km_calc||0),0),impKm:ts.reduce((a,t)=>a+(t.importe_km||0),0),park:ts.reduce((a,t)=>a+(parseFloat(t.parking)||0),0),total:ts.reduce((a,t)=>a+(t.total||0),0)};
+}
+function calcPrev(){
+  const f=st.form,park=parseFloat(f.parking)||0;
+  if(f.transporte==='VTC / Taxi'){const v=parseFloat(f.vtc_importe)||0;return{km:0,impKm:v,total:v+park};}
+  if(f.transporte==='Vehículo Propio'){
+    const base=f.destino==='Otros'?parseFloat(f.km_manual)||0:parseFloat((st.cfg.km||{})[kmk(f.origen,f.destino)])||0;
+    const km=base*(f.ida_vuelta?2:1),impKm=km*(parseFloat(st.cfg.rate)||0.26);
+    return{km,impKm,total:impKm+park};
+  }
+  return{km:0,impKm:0,total:park};
+}
+
+// ── Storage ────────────────────────────────────────────────────────────────────
+function load(){
+  try{st.trips=JSON.parse(localStorage.getItem(LS_T)||'[]');}catch{}
+  try{const c=JSON.parse(localStorage.getItem(LS_C));if(c)st.cfg=c;}catch{}
+}
+function saveT(){localStorage.setItem(LS_T,JSON.stringify(st.trips));}
+function saveC(){localStorage.setItem(LS_C,JSON.stringify(st.cfg));}
+
+function notify(msg){
+  st.toast=msg;showToast();
+  setTimeout(()=>{st.toast='';showToast();},2400);
+}
+function showToast(){
+  let el=document.getElementById('toast');
+  if(st.toast){if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}el.textContent=st.toast;}
+  else if(el)el.remove();
+}
+
+// ── Navegación ────────────────────────────────────────────────────────────────
+function go(screen,month){
+  st.screen=screen;st.editCell=null;
+  if(month)st.selMonth=month;
+  if(screen==='new_trip')st.form={...EF,fecha:today()};
+  if(screen==='config')st.cfgDraft=JSON.parse(JSON.stringify(st.cfg));
+  if(screen==='home')st.selMonth=null;
+  render();
+}
+function goBack(){['new_trip','trips_table'].includes(st.screen)?go('month'):go('home');}
+
+// ── CRUD viajes ────────────────────────────────────────────────────────────────
+function readForm(){
+  ['fecha','vtc_importe','parking','km_manual','destino_custom','motivo_custom'].forEach(f=>{
+    const el=document.querySelector(`[data-f="${f}"]`);if(el)st.form[f]=el.value;
+  });
+}
+function addTrip(){
+  readForm();
+  const f=st.form;
+  if(!f.origen||!f.destino||!f.motivo||!f.transporte){alert('Rellena Origen, Destino, Motivo y Transporte.');return;}
+  st.trips.push(calcT({...f,id:uid(),month:st.selMonth?.id},st.cfg));
+  saveT();notify('✓ Viaje guardado');setTimeout(()=>go('month'),100);
+}
+function delTrip(id){
+  if(!confirm('¿Eliminar este viaje?'))return;
+  st.trips=st.trips.filter(t=>t.id!==id);saveT();render();
+}
+function startEdit(id,field,val){
+  st.editCell={id,field};st.editVal=val;render();
+  setTimeout(()=>{const i=document.getElementById('ei');if(i){i.focus();i.select();}},40);
+}
+function commitEdit(){
+  if(!st.editCell)return;
+  const i=document.getElementById('ei'),val=i?i.value:st.editVal;
+  st.trips=st.trips.map(t=>t.id===st.editCell.id?calcT({...t,[st.editCell.field]:val},st.cfg):t);
+  saveT();st.editCell=null;render();
+}
+function cancelEdit(){st.editCell=null;render();}
+function toggleIV(id){
+  st.trips=st.trips.map(t=>t.id===id?calcT({...t,ida_vuelta:!t.ida_vuelta},st.cfg):t);saveT();render();
+}
+
+// ── Config ────────────────────────────────────────────────────────────────────
+function saveConfig(){
+  const re=document.querySelector('[data-cr]');if(re)st.cfgDraft.rate=re.value;
+  KM_PAIRS.forEach(({key})=>{const el=document.querySelector(`[data-ck="${key}"]`);if(el){if(el.value)st.cfgDraft.km[key]=el.value;else delete st.cfgDraft.km[key];}});
+  st.cfg={...st.cfgDraft,km:{...st.cfgDraft.km}};saveC();
+  notify('✓ Configuración guardada');setTimeout(()=>go('home'),200);
+}
+
+// ── Excel ──────────────────────────────────────────────────────────────────────
+function exportMonth(){
+  if(typeof XLSX==='undefined'){alert('Cargando librería Excel, espera un momento e intenta de nuevo.');return;}
+  const m=st.selMonth;if(!m)return;
+  const ts=byM(m.id).map(t=>calcT(t,st.cfg));
+  if(!ts.length){alert('Sin viajes en '+m.label);return;}
+  const rows=ts.map(t=>({Fecha:t.fecha,Origen:t.origen,Destino:t.destino==='Otros'?(t.destino_custom||'Otros'):t.destino,Motivo:t.motivo==='Otros'?(t.motivo_custom||'Otros'):t.motivo,Transporte:t.transporte,Km:t.transporte!=='VTC / Taxi'?+(t.km_calc||0).toFixed(1):'','Ida/V':t.transporte!=='VTC / Taxi'?(t.ida_vuelta?'Sí':'No'):'',"VTC(€)":t.transporte==='VTC / Taxi'?+(parseFloat(t.vtc_importe)||0).toFixed(2):'',"Parking(€)":+(parseFloat(t.parking)||0).toFixed(2),"Imp.Km(€)":+(t.importe_km||0).toFixed(2),"Total(€)":+(t.total||0).toFixed(2)}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),m.label);XLSX.writeFile(wb,`Gastos_${m.label}_2026.xlsx`);
+}
+function exportTotal(){
+  if(typeof XLSX==='undefined'){alert('Cargando librería Excel, espera un momento e intenta de nuevo.');return;}
+  const wb=XLSX.utils.book_new();
+  const sum=MESES.map(m=>{const s=mSum(m.id);return{Mes:m.label,Viajes:s.n,Km:+s.km.toFixed(1),'Imp.Km':+s.impKm.toFixed(2),Parking:+s.park.toFixed(2),Total:+s.total.toFixed(2)};});
+  const T={Mes:'TOTAL',Viajes:sum.reduce((a,r)=>a+r.Viajes,0),Km:+sum.reduce((a,r)=>a+r.Km,0).toFixed(1),'Imp.Km':+sum.reduce((a,r)=>a+r['Imp.Km'],0).toFixed(2),Parking:+sum.reduce((a,r)=>a+r.Parking,0).toFixed(2),Total:+sum.reduce((a,r)=>a+r.Total,0).toFixed(2)};
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet([...sum,T]),'Resumen');
+  MESES.forEach(m=>{const ts=byM(m.id).map(t=>calcT(t,st.cfg));if(!ts.length)return;const rows=ts.map(t=>({Fecha:t.fecha,Origen:t.origen,Destino:t.destino==='Otros'?(t.destino_custom||'Otros'):t.destino,Motivo:t.motivo==='Otros'?(t.motivo_custom||'Otros'):t.motivo,Transporte:t.transporte,Km:t.transporte!=='VTC / Taxi'?+(t.km_calc||0).toFixed(1):'','I/V':t.transporte!=='VTC / Taxi'?(t.ida_vuelta?'Sí':'No'):'',"VTC(€)":t.transporte==='VTC / Taxi'?+(parseFloat(t.vtc_importe)||0):'',"Parking(€)":+(parseFloat(t.parking)||0).toFixed(2),"Imp.Km(€)":+(t.importe_km||0).toFixed(2),"Total(€)":+(t.total||0).toFixed(2)}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),m.label);});
+  XLSX.writeFile(wb,'Gastos_Transporte_Atropello_2026.xlsx');
+}
+
+// ── Construcción HTML ─────────────────────────────────────────────────────────
+function bHeader(){
+  const titles={home:'Gastos de Transporte',month:h(st.selMonth?.label||''),new_trip:`Nuevo Viaje · ${h(st.selMonth?.label||'')}`,trips_table:`Viajes · ${h(st.selMonth?.label||'')}`,total:'Resumen Total',config:'Configuración'};
+  const right=st.screen==='home'?`<button class="cfg-btn" data-a="go-config">⚙️</button>`:st.screen==='trips_table'?`<button class="xl-hdr" data-a="export-month">Excel ↓</button>`:'';
+  return`<div class="hdr"><div class="hdr-l">${st.screen!=='home'?`<button class="back-btn" data-a="back">‹</button>`:''}<div><div class="hdr-title">${titles[st.screen]||''}</div>${st.screen==='home'?`<div class="hdr-sub">Expediente Atropello 2026</div>`:''}</div></div>${right}</div>`;
+}
+
+function bHome(){
+  const grand=MESES.reduce((a,m)=>{const s=mSum(m.id);return{n:a.n+s.n,total:a.total+s.total};},{n:0,total:0});
+  return`<div class="mgrid">${MESES.map(m=>{const s=mSum(m.id);return`<button class="mcrd" data-a="go-month" data-mid="${m.id}" data-ml="${h(m.label)}"><div class="mname">${m.label}</div>${s.n>0?`<div class="mn">${s.n} viaje${s.n!==1?'s':''}</div><div class="mtot">${eur(s.total)}</div>`:`<div class="mn" style="color:#0F2744">Sin registros</div>`}</button>`;}).join('')}</div>
+  <button class="tbig" data-a="go-total"><div><div class="tbig-lbl">TOTAL ACUMULADO</div><div class="tbig-sub">${grand.n} viajes registrados</div></div><div class="tbig-amt">${eur(grand.total)}</div></button>`;
+}
+
+function bMonth(){
+  const ts=byM(st.selMonth.id).map(t=>calcT(t,st.cfg));
+  const km=ts.reduce((a,t)=>a+(t.km_calc||0),0),tot=ts.reduce((a,t)=>a+(t.total||0),0);
+  return`${ts.length>0?`<div class="msum"><div><div class="msl">VIAJES</div><div class="msv">${ts.length}</div></div><div><div class="msl">KM</div><div class="msv">${km.toFixed(0)}</div></div><div><div class="msl">TOTAL</div><div class="msv g">${eur(tot)}</div></div></div>`:''}
+  <button class="btn bg" data-a="go-new">＋ Nuevo Viaje</button>
+  <button class="btn bd" data-a="go-table">📋 Viajes del mes (${ts.length})</button>`;
+}
+
+function bNewTrip(){
+  const f=st.form,p=calcPrev();
+  const kmInfo=()=>{
+    if(f.transporte!=='Vehículo Propio'||!f.origen||!f.destino||f.destino==='Otros')return'';
+    const base=parseFloat((st.cfg.km||{})[kmk(f.origen,f.destino)])||0;
+    const txt=base>0?`${base.toFixed(1)} km${f.ida_vuelta?` × 2 = ${(base*2).toFixed(1)} km`:''} · ${eur(p.impKm)}`:'⚠️ Introduce la distancia en ⚙️ Configuración';
+    return`<div class="kmi">${txt}</div>`;
+  };
+  const summary=()=>{
+    if(!f.origen||!f.destino||!f.motivo||!f.transporte)return'';
+    const rows=[['Fecha',f.fecha],['Origen',f.origen],['Destino',f.destino==='Otros'?(f.destino_custom||'—'):f.destino],['Motivo',f.motivo==='Otros'?(f.motivo_custom||'—'):f.motivo],['Transporte',f.transporte],...(f.transporte==='Vehículo Propio'?[['Km',`${p.km.toFixed(1)} km${f.ida_vuelta?' (I/V)':' (ida)'}`],['Importe km',eur(p.impKm)]]:[['VTC / Taxi',eur(parseFloat(f.vtc_importe)||0)]]),['Parking',eur(parseFloat(f.parking)||0)]];
+    return`<div class="sumbox"><span class="sl">Resumen del viaje</span>${rows.map(([k,v])=>`<div class="sr"><span class="sk">${k}</span><span class="sv">${h(v)}</span></div>`).join('')}<div class="stot"><span class="stot-l">TOTAL</span><span class="stot-v" id="prev-total">${eur(p.total)}</span></div></div>`;
+  };
+  return`
+  <div class="sec"><span class="sl">Fecha</span><input type="date" data-f="fecha" value="${h(f.fecha)}"></div>
+  <div class="sec"><span class="sl">Origen</span><div class="bg2">${ORIGENES.map(o=>`<button class="sb${f.origen===o?' on':''}" data-a="sel" data-fn="origen" data-fv="${h(o)}">${o}</button>`).join('')}</div></div>
+  <div class="sec"><span class="sl">Destino</span><div class="bg2">${DESTINOS.map(d=>`<button class="sb sm${f.destino===d?' on':''}" data-a="sel" data-fn="destino" data-fv="${h(d)}">${d}</button>`).join('')}</div>${f.destino==='Otros'?`<input type="text" data-f="destino_custom" value="${h(f.destino_custom)}" placeholder="Especifica el destino…" style="margin-top:10px">`:''}</div>
+  <div class="sec"><span class="sl">Motivo</span><div class="bg2">${MOTIVOS.map(m=>`<button class="sb sm${f.motivo===m?' on':''}" data-a="sel" data-fn="motivo" data-fv="${h(m)}">${m}</button>`).join('')}</div>${f.motivo==='Otros'?`<input type="text" data-f="motivo_custom" value="${h(f.motivo_custom)}" placeholder="Especifica el motivo…" style="margin-top:10px">`:''}</div>
+  <div class="sec"><span class="sl">Tipo de transporte</span>
+    <div class="bg2">${TRANSP.map(t=>`<button class="sb${f.transporte===t?' on':''}" data-a="sel" data-fn="transporte" data-fv="${h(t)}">${t}</button>`).join('')}</div>
+    ${f.transporte==='VTC / Taxi'?`<div style="margin-top:12px"><span class="sl">Importe del viaje (€)</span><input type="number" inputmode="decimal" data-f="vtc_importe" value="${h(f.vtc_importe)}" placeholder="0,00"></div>`:''}
+    ${f.transporte==='Vehículo Propio'?`<div style="margin-top:12px"><button class="tgl ${f.ida_vuelta?'on':'off'}" data-a="toggle-iv">${f.ida_vuelta?'↔  Ida y Vuelta  (toca para cambiar)':'→  Solo Ida  (toca para cambiar)'}</button>${f.destino==='Otros'?`<span class="sl">Km desde origen (solo ida)</span><input type="number" inputmode="decimal" data-f="km_manual" value="${h(f.km_manual)}" placeholder="0,0" step="0.1">`:kmInfo()}</div>`:''}
+  </div>
+  <div class="sec"><span class="sl">Parking (€) — dejar vacío si no aplica</span><input type="number" inputmode="decimal" data-f="parking" value="${h(f.parking)}" placeholder="0,00"></div>
+  ${summary()}
+  <button class="btn bg" data-a="add-trip" style="padding:16px">✓  Guardar Viaje</button>
+  <div style="height:24px"></div>`;
+}
+
+function bTripsTable(){
+  const ts=byM(st.selMonth.id).map(t=>calcT(t,st.cfg));
+  if(!ts.length)return`<div class="empty">Sin viajes en ${h(st.selMonth?.label||'')}<br><br><button class="btn bg" data-a="go-new">＋ Nuevo Viaje</button></div>`;
+  const totP=ts.reduce((a,t)=>a+(parseFloat(t.parking)||0),0);
+  const totT=ts.reduce((a,t)=>a+(t.total||0),0);
+  const cell=(id,f,disp,type='text')=>st.editCell?.id===id&&st.editCell?.field===f
+    ?`<input id="ei" class="einp" type="${type}" value="${h(st.editVal)}">`
+    :`<span class="edbl" data-a="start-edit" data-eid="${id}" data-ef="${f}" data-ev="${h(disp)}">${h(disp)}</span>`;
+  return`<div class="twrap"><table>
+    <thead><tr><th>Fecha</th><th>Origen</th><th>Destino</th><th>Motivo</th><th>Tipo</th><th class="r">Km/€</th><th class="c">I/V</th><th class="r">Park</th><th class="r">Total</th><th></th></tr></thead>
+    <tbody>${ts.map(t=>`<tr>
+      <td>${cell(t.id,'fecha',t.fecha,'date')}</td>
+      <td style="white-space:nowrap;color:#93C5FD">${h(t.origen)}</td>
+      <td style="white-space:nowrap">${h(t.destino==='Otros'?(t.destino_custom||'Otros'):t.destino)}</td>
+      <td style="white-space:nowrap">${h(t.motivo==='Otros'?(t.motivo_custom||'Otros'):t.motivo)}</td>
+      <td style="color:#475E85;white-space:nowrap">${t.transporte==='VTC / Taxi'?'VTC':'🚗'}</td>
+      <td class="r">${t.transporte==='VTC / Taxi'?cell(t.id,'vtc_importe',t.vtc_importe||'0','number'):h((t.km_calc||0).toFixed(1))}</td>
+      <td class="c">${t.transporte!=='VTC / Taxi'?`<button class="ivbtn" data-a="toggle-iv-trip" data-tid="${t.id}">${t.ida_vuelta?'↔':'→'}</button>`:'—'}</td>
+      <td class="r">${cell(t.id,'parking',t.parking||'0','number')}</td>
+      <td class="g">${eur(t.total)}</td>
+      <td><button class="dbtn" data-a="del-trip" data-tid="${t.id}">×</button></td>
+    </tr>`).join('')}</tbody>
+    <tfoot><tr><td colspan="7">TOTAL ${h((st.selMonth?.label||'').toUpperCase())}</td><td class="r" style="color:#4ADE80">${eur(totP)}</td><td class="r" style="color:#4ADE80;font-weight:800">${eur(totT)}</td><td></td></tr></tfoot>
+  </table></div>
+  <button class="btn bd" data-a="go-new">＋ Nuevo Viaje</button>`;
+}
+
+function bTotal(){
+  const T=MESES.reduce((a,m)=>{const s=mSum(m.id);return{n:a.n+s.n,km:a.km+s.km,impKm:a.impKm+s.impKm,park:a.park+s.park,total:a.total+s.total};},{n:0,km:0,impKm:0,park:0,total:0});
+  return`<div class="twrap"><table class="ttbl">
+    <thead><tr><th>Mes</th><th class="r">Viajes</th><th class="r">Km</th><th class="r">Imp. Km</th><th class="r">Parking</th><th class="r">Total</th></tr></thead>
+    <tbody>${MESES.map(m=>{const s=mSum(m.id),c=s.n>0;return`<tr data-a="go-month-total" data-mid="${m.id}" data-ml="${h(m.label)}">
+      <td style="font-weight:700;color:#F1F5F9">${m.label}</td>
+      <td class="r" style="color:${c?'#CBD5E1':'#1E3A5F'}">${s.n}</td>
+      <td class="r" style="color:${c?'#CBD5E1':'#1E3A5F'}">${s.km.toFixed(1)}</td>
+      <td class="r" style="color:${c?'#CBD5E1':'#1E3A5F'}">${eur(s.impKm)}</td>
+      <td class="r" style="color:${c?'#CBD5E1':'#1E3A5F'}">${eur(s.park)}</td>
+      <td class="r" style="color:${c?'#4ADE80':'#1E3A5F'};font-weight:${c?800:400}">${eur(s.total)}</td>
+    </tr>`;}).join('')}</tbody>
+    <tfoot><tr style="border-top:2px solid #1E3A5F"><td>TOTAL</td><td class="r">${T.n}</td><td class="r">${T.km.toFixed(1)}</td><td class="r g">${eur(T.impKm)}</td><td class="r g">${eur(T.park)}</td><td class="r g" style="font-size:.9rem">${eur(T.total)}</td></tr></tfoot>
+  </table></div>
+  <button class="btn bx" data-a="export-total">📥  Exportar Excel completo</button>`;
+}
+
+function bConfig(){
+  const d=st.cfgDraft;
+  return`<div class="sec"><span class="sl">Tarifa oficial por km (€/km)</span>
+    <input type="number" inputmode="decimal" step="0.01" data-cr="1" value="${h(d.rate||0.26)}" placeholder="0.26">
+    <div class="note">AEAT 2024: 0,26 €/km · No cambiar salvo indicación de tu perito</div>
+  </div>
+  <div class="sec"><span class="sl">Distancias km · solo ida · de Google Maps</span>
+    ${KM_PAIRS.map(({key,label})=>`<div class="kmrow"><span class="kmlbl">${h(label)}</span><input type="number" inputmode="decimal" step="0.1" class="kminp" data-ck="${key}" value="${h((d.km||{})[key]||'')}" placeholder="0,0"><span class="kmunit">km</span></div>`).join('')}
+  </div>
+  <button class="btn bg" data-a="save-config">✓  Guardar Configuración</button>
+  <div style="height:24px"></div>`;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById('app'),sy=window.scrollY;
+  const body={home:bHome,month:bMonth,new_trip:bNewTrip,trips_table:bTripsTable,total:bTotal,config:bConfig};
+  app.innerHTML=bHeader()+`<div class="wrap">${(body[st.screen]||bHome)()}</div>`;
+  requestAnimationFrame(()=>window.scrollTo(0,sy));
+  if(st.editCell)setTimeout(()=>{const i=document.getElementById('ei');if(i){i.focus();i.select();}},40);
+}
+
+// ── Actualización parcial del preview (sin re-render completo) ────────────────
+function refreshPreview(){
+  const p=calcPrev();
+  const tv=document.getElementById('prev-total');
+  if(tv)tv.textContent=eur(p.total);
+}
+
+// ── Delegación de eventos ─────────────────────────────────────────────────────
+document.getElementById('app').addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;
+  const a=el.dataset.a;
+  if(a==='back')goBack();
+  else if(a==='go-month')go('month',{id:el.dataset.mid,label:el.dataset.ml});
+  else if(a==='go-total')go('total');
+  else if(a==='go-new')go('new_trip');
+  else if(a==='go-table')go('trips_table');
+  else if(a==='go-config')go('config');
+  else if(a==='go-month-total')go('month',{id:el.dataset.mid,label:el.dataset.ml});
+  else if(a==='sel'){st.form[el.dataset.fn]=el.dataset.fv;render();}
+  else if(a==='toggle-iv'){st.form.ida_vuelta=!st.form.ida_vuelta;render();}
+  else if(a==='add-trip')addTrip();
+  else if(a==='del-trip')delTrip(el.dataset.tid);
+  else if(a==='start-edit')startEdit(el.dataset.eid,el.dataset.ef,el.dataset.ev);
+  else if(a==='toggle-iv-trip')toggleIV(el.dataset.tid);
+  else if(a==='save-config')saveConfig();
+  else if(a==='export-month')exportMonth();
+  else if(a==='export-total')exportTotal();
+});
+
+document.getElementById('app').addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.f){
+    st.form[el.dataset.f]=el.value;
+    if(['vtc_importe','parking','km_manual'].includes(el.dataset.f))refreshPreview();
+  }
+  if(el.dataset.cr!==undefined)st.cfgDraft.rate=el.value;
+  if(el.dataset.ck){if(!st.cfgDraft.km)st.cfgDraft.km={};st.cfgDraft.km[el.dataset.ck]=el.value;}
+  if(el.id==='ei')st.editVal=el.value;
+});
+
+document.getElementById('app').addEventListener('keydown',e=>{
+  if(e.target.id==='ei'){if(e.key==='Enter')commitEdit();if(e.key==='Escape')cancelEdit();}
+});
+document.getElementById('app').addEventListener('focusout',e=>{
+  if(e.target.id==='ei')setTimeout(commitEdit,80);
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+load();
+render();
+</script>
+
+<!-- XLSX desde CDN (necesita conexión la primera vez) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>

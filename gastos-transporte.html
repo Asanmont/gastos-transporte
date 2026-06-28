@@ -221,21 +221,31 @@ function saveConfig(){
 }
 
 // ── Excel ──────────────────────────────────────────────────────────────────────
+// Anchos de columna para hojas de viajes detallados
+const COLS_VIAJES=[{wch:12},{wch:20},{wch:22},{wch:24},{wch:16},{wch:8},{wch:6},{wch:10},{wch:12},{wch:12},{wch:12}];
+// Anchos de columna para hoja resumen
+const COLS_RESUMEN=[{wch:14},{wch:8},{wch:10},{wch:14},{wch:12},{wch:12}];
+
+function setColWidths(ws,cols){ws['!cols']=cols;return ws;}
+
 function exportMonth(){
   if(typeof XLSX==='undefined'){alert('Cargando librería Excel, espera un momento e intenta de nuevo.');return;}
   const m=st.selMonth;if(!m)return;
   const ts=byM(m.id).map(t=>calcT(t,st.cfg));
   if(!ts.length){alert('Sin viajes en '+m.label);return;}
   const rows=ts.map(t=>({Fecha:t.fecha,Origen:t.origen,Destino:t.destino==='Otros'?(t.destino_custom||'Otros'):t.destino,Motivo:t.motivo==='Otros'?(t.motivo_custom||'Otros'):t.motivo,Transporte:t.transporte,Km:t.transporte!=='VTC / Taxi'?+(t.km_calc||0).toFixed(1):'','Ida/V':t.transporte!=='VTC / Taxi'?(t.ida_vuelta?'Sí':'No'):'',"VTC(€)":t.transporte==='VTC / Taxi'?+(parseFloat(t.vtc_importe)||0).toFixed(2):'',"Parking(€)":+(parseFloat(t.parking)||0).toFixed(2),"Imp.Km(€)":+(t.importe_km||0).toFixed(2),"Total(€)":+(t.total||0).toFixed(2)}));
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),m.label);XLSX.writeFile(wb,`Gastos_${m.label}_2026.xlsx`);
+  const wb=XLSX.utils.book_new();
+  const ws=setColWidths(XLSX.utils.json_to_sheet(rows),COLS_VIAJES);
+  XLSX.utils.book_append_sheet(wb,ws,m.label);
+  XLSX.writeFile(wb,`Gastos_${m.label}_2026.xlsx`);
 }
 function exportTotal(){
   if(typeof XLSX==='undefined'){alert('Cargando librería Excel, espera un momento e intenta de nuevo.');return;}
   const wb=XLSX.utils.book_new();
   const sum=MESES.map(m=>{const s=mSum(m.id);return{Mes:m.label,Viajes:s.n,Km:+s.km.toFixed(1),'Imp.Km':+s.impKm.toFixed(2),Parking:+s.park.toFixed(2),Total:+s.total.toFixed(2)};});
   const T={Mes:'TOTAL',Viajes:sum.reduce((a,r)=>a+r.Viajes,0),Km:+sum.reduce((a,r)=>a+r.Km,0).toFixed(1),'Imp.Km':+sum.reduce((a,r)=>a+r['Imp.Km'],0).toFixed(2),Parking:+sum.reduce((a,r)=>a+r.Parking,0).toFixed(2),Total:+sum.reduce((a,r)=>a+r.Total,0).toFixed(2)};
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet([...sum,T]),'Resumen');
-  MESES.forEach(m=>{const ts=byM(m.id).map(t=>calcT(t,st.cfg));if(!ts.length)return;const rows=ts.map(t=>({Fecha:t.fecha,Origen:t.origen,Destino:t.destino==='Otros'?(t.destino_custom||'Otros'):t.destino,Motivo:t.motivo==='Otros'?(t.motivo_custom||'Otros'):t.motivo,Transporte:t.transporte,Km:t.transporte!=='VTC / Taxi'?+(t.km_calc||0).toFixed(1):'','I/V':t.transporte!=='VTC / Taxi'?(t.ida_vuelta?'Sí':'No'):'',"VTC(€)":t.transporte==='VTC / Taxi'?+(parseFloat(t.vtc_importe)||0):'',"Parking(€)":+(parseFloat(t.parking)||0).toFixed(2),"Imp.Km(€)":+(t.importe_km||0).toFixed(2),"Total(€)":+(t.total||0).toFixed(2)}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),m.label);});
+  XLSX.utils.book_append_sheet(wb,setColWidths(XLSX.utils.json_to_sheet([...sum,T]),COLS_RESUMEN),'Resumen');
+  MESES.forEach(m=>{const ts=byM(m.id).map(t=>calcT(t,st.cfg));if(!ts.length)return;const rows=ts.map(t=>({Fecha:t.fecha,Origen:t.origen,Destino:t.destino==='Otros'?(t.destino_custom||'Otros'):t.destino,Motivo:t.motivo==='Otros'?(t.motivo_custom||'Otros'):t.motivo,Transporte:t.transporte,Km:t.transporte!=='VTC / Taxi'?+(t.km_calc||0).toFixed(1):'','I/V':t.transporte!=='VTC / Taxi'?(t.ida_vuelta?'Sí':'No'):'',"VTC(€)":t.transporte==='VTC / Taxi'?+(parseFloat(t.vtc_importe)||0):'',"Parking(€)":+(parseFloat(t.parking)||0).toFixed(2),"Imp.Km(€)":+(t.importe_km||0).toFixed(2),"Total(€)":+(t.total||0).toFixed(2)}));XLSX.utils.book_append_sheet(wb,setColWidths(XLSX.utils.json_to_sheet(rows),COLS_VIAJES),m.label);});
   XLSX.writeFile(wb,'Gastos_Transporte_Atropello_2026.xlsx');
 }
 

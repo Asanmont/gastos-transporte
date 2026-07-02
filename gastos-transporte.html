@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Gastos Transporte</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #232634;
+  --border: #2e3347;
+  --accent: #4f8ef7;
+  --accent2: #7c5cbf;
+  --green: #3dbe7a;
+  --red: #e05555;
+  --text: #e8eaf0;
+  --text2: #8b90a7;
+  --text3: #5a5f78;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+/* ── Layout ── */
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+.screen.active { display: flex; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.topbar h1 { font-size: 17px; font-weight: 600; flex: 1; }
+.topbar .back { background: none; border: none; color: var(--accent); font-size: 22px; cursor: pointer; padding: 4px 8px 4px 0; }
+.topbar .icon-btn { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
+.content { flex: 1; padding: 16px; overflow-y: auto; }
+
+/* ── Home ── */
+.month-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.month-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 16px; cursor: pointer; transition: border-color .2s, background .2s; }
+.month-card:active { background: var(--surface2); }
+.month-card .m-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.month-card .m-stats { font-size: 12px; color: var(--text2); }
+.month-card .m-total { font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 8px; }
+.total-card { background: linear-gradient(135deg, var(--accent2), var(--accent)); border-radius: var(--radius); padding: 20px; cursor: pointer; margin-bottom: 12px; }
+.total-card .t-label { font-size: 13px; opacity: .8; margin-bottom: 4px; }
+.total-card .t-amount { font-size: 28px; font-weight: 700; }
+.total-card .t-trips { font-size: 12px; opacity: .7; margin-top: 4px; }
+
+/* ── Buttons ── */
+.btn { display: block; width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+.btn:active { opacity: .75; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-row { display: flex; gap: 10px; }
+.btn-row .btn { flex: 1; }
+
+/* ── Selector grid ── */
+.field-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; margin-top: 16px; }
+.sel-grid { display: grid; gap: 8px; }
+.sel-grid.cols2 { grid-template-columns: 1fr 1fr; }
+.sel-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.sel-btn { padding: 10px 8px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--text2); cursor: pointer; text-align: center; line-height: 1.3; transition: all .15s; }
+.sel-btn:active { opacity: .7; }
+.sel-btn.selected { border-color: var(--accent); background: rgba(79,142,247,.15); color: var(--text); }
+
+/* ── Text input ── */
+.text-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; color: var(--text); font-size: 14px; margin-top: 8px; outline: none; }
+.text-input:focus { border-color: var(--accent); }
+
+/* ── Trip list ── */
+.trip-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.trip-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; align-items: flex-start; gap: 12px; }
+.trip-card .tc-main { flex: 1; min-width: 0; }
+.trip-card .tc-date { font-size: 12px; color: var(--text2); margin-bottom: 3px; }
+.trip-card .tc-route { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trip-card .tc-motive { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.trip-card .tc-amount { font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.trip-card .tc-km { font-size: 11px; color: var(--text3); text-align: right; }
+.trip-card .del-btn { background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; }
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); font-size: 14px; }
+
+/* ── Month summary bar ── */
+.month-summary { background: var(--surface2); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.ms-label { font-size: 12px; color: var(--text2); }
+.ms-val { font-size: 20px; font-weight: 700; color: var(--accent); }
+.ms-sub { font-size: 11px; color: var(--text3); }
+
+/* ── Config ── */
+.config-section { margin-bottom: 24px; }
+.config-section h3 { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+.km-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+.km-row label { flex: 1; font-size: 13px; color: var(--text2); line-height: 1.3; }
+.km-input { width: 72px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--text); font-size: 14px; text-align: right; outline: none; flex-shrink: 0; }
+.km-input:focus { border-color: var(--accent); }
+
+/* ── Divider ── */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ── Toast ── */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── New trip form ── */
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.form-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.form-card .form-subtitle { font-size: 12px; color: var(--text2); margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<!-- ══ HOME ══════════════════════════════════════════════════════════════ -->
+<div id="home" class="screen active">
+  <div class="topbar">
+    <h1>🚗 Gastos Transporte</h1>
+    <button class="icon-btn" onclick="goConfig()">⚙️</button>
+  </div>
+  <div class="content">
+    <div class="total-card" onclick="exportAll()">
+      <div class="t-label">Total acumulado 2026 · Pulsa para exportar Excel</div>
+      <div class="t-amount" id="home-total">0,00 €</div>
+      <div class="t-trips" id="home-trips">0 trayectos</div>
+    </div>
+    <div class="month-grid" id="month-grid"></div>
+  </div>
+</div>
+
+<!-- ══ MES ════════════════════════════════════════════════════════════════ -->
+<div id="month-screen" class="screen">
+  <div class="topbar">
+    <button class="back" onclick="goHome()">‹</button>
+    <h1 id="month-title">Mes</h1>
+    <button class="icon-btn" onclick="exportMonth()">📥</button>
+  </div>
+  <div class="content">
+    <div class="month-summary">
+      <div>
+        <div class="ms-label">Total mes</div>
+        <div class="ms-val" id="month-total-val">0,00 €</div>
+        <div class="ms-sub" id="month-km-val">0 km · 0 trayectos</div>
+      </div>
+    </div>
+
+    <!-- Nuevo trayecto -->
+    <div class="form-card">
+      <h3>Nuevo trayecto</h3>
+      <div class="form-subtitle">Introduce un trayecto por registro</div>
+
+      <div class="field-label">Fecha</div>
+      <input type="date" id="f-date" class="text-input" style="margin-top:0">
+
+      <div class="field-label">Origen</div>
+      <div class="sel-grid cols2" id="grid-origen"></div>
+      <input type="text" id="f-origen-otro" class="text-input" placeholder="Especifica origen..." style="display:none">
+
+      <div class="field-label">Destino</div>
+      <div class="sel-grid cols2" id="grid-destino"></div>
+      <input type="text" id="f-destino-otro" class="text-input" placeholder="Especifica destino..." style="display:none">
+
+      <div class="field-label">Motivo</div>
+      <div class="sel-grid cols2" id="grid-motivo"></div>
+      <input type="text" id="f-motivo-otro" class="text-input" placeholder="Especifica motivo..." style="display:none">
+
+      <div class="field-label">Kilómetros</div>
+      <input type="number" id="f-km" class="text-input" placeholder="km (se completa auto desde config)" min="0" step="0.1" style="margin-top:0">
+
+      <div style="margin-top:16px">
+        <button class="btn btn-primary" onclick="addTrip()">Añadir trayecto</button>
+      </div>
+    </div>
+
+    <div class="trip-list" id="trip-list"></div>
+  </div>
+</div>
+
+<!-- ══ CONFIG ═════════════════════════════════════════════════════════════ -->
+<div id="config-screen" class="screen">
+  <div class="topbar">
+    <button class="back" onclick="goHome()">‹</button>
+    <h1>Configuración</h1>
+    <button class="icon-btn" onclick="saveConfig()">💾</button>
+  </div>
+  <div class="content">
+    <div class="config-section">
+      <h3>Tarifa €/km (AEAT 2026)</h3>
+      <div class="km-row">
+        <label>Importe por kilómetro</label>
+        <input type="number" id="cfg-rate" class="km-input" step="0.01" value="0.26">
+      </div>
+    </div>
+    <div class="config-section">
+      <h3>Distancias por trayecto (km)</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Los pares simétricos se rellenan automáticamente. Deja en 0 los trayectos que no uses.</p>
+      <div id="km-pairs"></div>
+    </div>
+    <button class="btn btn-green" onclick="saveConfig()">Guardar configuración</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const LUGARES = [
+  'Casa',
+  'Homebox Sevilla',
+  'Zebrabox Sevilla',
+  'Medihp Tomares',
+  'Medihp Sevilla',
+  'Viamed Fátima',
+  'Clínica Osten',
+  'Fremap Mutua Trabajo',
+  'Centro Salud Mairena',
+  'Despacho Abogados',
+  'Otros',
+];
+
+const MOTIVOS = [
+  'Rehabilitación',
+  'Consulta Rehabilitador',
+  'Consulta Psiquiatra',
+  'Consulta Psicólogo',
+  'Consulta Traumatólogo',
+  'Pruebas Médicas',
+  'Peritaje MMA',
+  'Peritaje Propio',
+  'Reunión Abogados',
+  'Otros',
+];
+
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const ACTIVE_MONTHS = [5,6,7,8,9,10,11]; // 0-indexed June=5 ... Dec=11
+const RATE_KEY = 'gt_rate';
+const TRIPS_KEY = 'gt_trips';
+const KM_KEY = 'gt_km';
+
+// ── State ──────────────────────────────────────────────────────────────────
+let currentMonth = null;
+let selOrigen = null;
+let selDestino = null;
+let selMotivo = null;
+
+// ── Storage ────────────────────────────────────────────────────────────────
+function getRate() { return parseFloat(localStorage.getItem(RATE_KEY) || '0.26'); }
+function getTrips() { try { return JSON.parse(localStorage.getItem(TRIPS_KEY) || '[]'); } catch(e){return [];} }
+function saveTrips(t) { localStorage.setItem(TRIPS_KEY, JSON.stringify(t)); }
+function getKmMap() { try { return JSON.parse(localStorage.getItem(KM_KEY) || '{}'); } catch(e){return {};} }
+function saveKmMap(m) { localStorage.setItem(KM_KEY, JSON.stringify(m)); }
+
+function kmKey(a, b) { return [a,b].sort().join('|||'); }
+function getKm(a, b) {
+  if (!a || !b || a === b) return 0;
+  const map = getKmMap();
+  return parseFloat(map[kmKey(a,b)] || 0);
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome() { renderHome(); show('home'); }
+function goConfig() { renderConfig(); show('config-screen'); }
+
+function goMonth(m) {
+  currentMonth = m;
+  document.getElementById('month-title').textContent = MONTHS[m] + ' 2026';
+  selOrigen = null; selDestino = null; selMotivo = null;
+  // Set today's date
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  document.getElementById('f-date').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('f-km').value = '';
+  document.getElementById('f-origen-otro').style.display = 'none';
+  document.getElementById('f-destino-otro').style.display = 'none';
+  document.getElementById('f-motivo-otro').style.display = 'none';
+  renderSelectorGrid('grid-origen', LUGARES, 'origen');
+  renderSelectorGrid('grid-destino', LUGARES, 'destino');
+  renderSelectorGrid('grid-motivo', MOTIVOS, 'motivo');
+  renderTripList();
+  renderMonthSummary();
+  show('month-screen');
+}
+
+// ── Selector grids ─────────────────────────────────────────────────────────
+function renderSelectorGrid(gridId, items, type) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = items.map(item => 
+    `<button class="sel-btn" onclick="selectItem('${type}','${item}',this)">${item}</button>`
+  ).join('');
+}
+
+function selectItem(type, val, btn) {
+  const gridId = type === 'origen' ? 'grid-origen' : type === 'destino' ? 'grid-destino' : 'grid-motivo';
+  document.querySelectorAll(`#${gridId} .sel-btn`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  const otroId = type === 'origen' ? 'f-origen-otro' : type === 'destino' ? 'f-destino-otro' : 'f-motivo-otro';
+  document.getElementById(otroId).style.display = val === 'Otros' ? 'block' : 'none';
+
+  if (type === 'origen') selOrigen = val;
+  else if (type === 'destino') selDestino = val;
+  else selMotivo = val;
+
+  // Auto-fill km
+  if (type === 'origen' || type === 'destino') {
+    const o = type === 'origen' ? val : selOrigen;
+    const d = type === 'destino' ? val : selDestino;
+    if (o && d && o !== 'Otros' && d !== 'Otros') {
+      const km = getKm(o, d);
+      if (km > 0) document.getElementById('f-km').value = km;
+    }
+  }
+}
+
+// ── Trip CRUD ──────────────────────────────────────────────────────────────
+function addTrip() {
+  const date = document.getElementById('f-date').value;
+  if (!date) { toast('Indica la fecha'); return; }
+  if (!selOrigen) { toast('Selecciona origen'); return; }
+  if (!selDestino) { toast('Selecciona destino'); return; }
+  if (selOrigen === selDestino) { toast('Origen y destino no pueden ser iguales'); return; }
+  if (!selMotivo) { toast('Selecciona motivo'); return; }
+
+  const origenFinal = selOrigen === 'Otros'
+    ? (document.getElementById('f-origen-otro').value.trim() || 'Otros')
+    : selOrigen;
+  const destinoFinal = selDestino === 'Otros'
+    ? (document.getElementById('f-destino-otro').value.trim() || 'Otros')
+    : selDestino;
+  const motivoFinal = selMotivo === 'Otros'
+    ? (document.getElementById('f-motivo-otro').value.trim() || 'Otros')
+    : selMotivo === 'Pruebas Médicas'
+      ? (document.getElementById('f-motivo-otro').value.trim() || 'Pruebas Médicas')
+      : selMotivo;
+
+  const km = parseFloat(document.getElementById('f-km').value || 0);
+  if (km <= 0) { toast('Indica los kilómetros'); return; }
+
+  const rate = getRate();
+  const importe = Math.round(km * rate * 100) / 100;
+
+  const trips = getTrips();
+  trips.push({
+    id: Date.now(),
+    month: currentMonth,
+    date,
+    origen: origenFinal,
+    destino: destinoFinal,
+    motivo: motivoFinal,
+    km,
+    rate,
+    importe,
+  });
+  saveTrips(trips);
+
+  // Reset form
+  selOrigen = null; selDestino = null; selMotivo = null;
+  document.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('f-km').value = '';
+  document.getElementById('f-origen-otro').style.display = 'none';
+  document.getElementById('f-destino-otro').style.display = 'none';
+  document.getElementById('f-motivo-otro').style.display = 'none';
+
+  renderTripList();
+  renderMonthSummary();
+  renderHome();
+  toast('Trayecto añadido ✓');
+}
+
+function deleteTrip(id) {
+  if (!confirm('¿Eliminar este trayecto?')) return;
+  saveTrips(getTrips().filter(t => t.id !== id));
+  renderTripList();
+  renderMonthSummary();
+  renderHome();
+}
+
+function monthTrips(m) {
+  return getTrips()
+    .filter(t => t.month === m)
+    .sort((a,b) => a.date.localeCompare(b.date));
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderHome() {
+  const trips = getTrips();
+  const total = trips.reduce((s,t) => s+t.importe, 0);
+  const totalKm = trips.reduce((s,t) => s+t.km, 0);
+  document.getElementById('home-total').textContent = fmt(total);
+  document.getElementById('home-trips').textContent = `${trips.length} trayectos · ${fmtKm(totalKm)} km`;
+
+  const grid = document.getElementById('month-grid');
+  grid.innerHTML = ACTIVE_MONTHS.map(m => {
+    const mt = monthTrips(m);
+    const mTotal = mt.reduce((s,t) => s+t.importe, 0);
+    const mKm = mt.reduce((s,t) => s+t.km, 0);
+    return `<div class="month-card" onclick="goMonth(${m})">
+      <div class="m-name">${MONTHS[m]}</div>
+      <div class="m-stats">${mt.length} trayectos · ${fmtKm(mKm)} km</div>
+      <div class="m-total">${fmt(mTotal)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMonthSummary() {
+  const mt = monthTrips(currentMonth);
+  const total = mt.reduce((s,t) => s+t.importe, 0);
+  const km = mt.reduce((s,t) => s+t.km, 0);
+  document.getElementById('month-total-val').textContent = fmt(total);
+  document.getElementById('month-km-val').textContent = `${fmtKm(km)} km · ${mt.length} trayectos`;
+}
+
+function renderTripList() {
+  const list = document.getElementById('trip-list');
+  const mt = monthTrips(currentMonth);
+  if (!mt.length) {
+    list.innerHTML = '<div class="empty-state">Sin trayectos registrados este mes</div>';
+    return;
+  }
+  list.innerHTML = mt.map(t => `
+    <div class="trip-card">
+      <div class="tc-main">
+        <div class="tc-date">${fmtDate(t.date)}</div>
+        <div class="tc-route">${t.origen} → ${t.destino}</div>
+        <div class="tc-motive">${t.motivo}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="tc-amount">${fmt(t.importe)}</div>
+        <div class="tc-km">${fmtKm(t.km)} km</div>
+      </div>
+      <button class="del-btn" onclick="deleteTrip(${t.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function renderConfig() {
+  document.getElementById('cfg-rate').value = getRate();
+  const map = getKmMap();
+  const container = document.getElementById('km-pairs');
+
+  // Generate all pairs (upper triangle only, symmetric)
+  const pairs = [];
+  for (let i = 0; i < LUGARES.length - 1; i++) { // exclude 'Otros'
+    for (let j = i+1; j < LUGARES.length - 1; j++) {
+      pairs.push([LUGARES[i], LUGARES[j]]);
+    }
+  }
+
+  container.innerHTML = pairs.map(([a,b]) => {
+    const k = kmKey(a,b);
+    const val = map[k] || '';
+    return `<div class="km-row">
+      <label>${a}<br><span style="color:var(--text3)">→ ${b}</span></label>
+      <input type="number" class="km-input" data-pair="${k}" data-a="${a}" data-b="${b}"
+             value="${val}" min="0" step="0.1" placeholder="0">
+    </div>`;
+  }).join('');
+}
+
+function saveConfig() {
+  const rate = parseFloat(document.getElementById('cfg-rate').value || '0.26');
+  localStorage.setItem(RATE_KEY, rate);
+
+  const map = getKmMap();
+  document.querySelectorAll('.km-input[data-pair]').forEach(input => {
+    const k = input.dataset.pair;
+    const val = parseFloat(input.value || 0);
+    if (val > 0) map[k] = val;
+    else delete map[k];
+  });
+  saveKmMap(map);
+  toast('Configuración guardada ✓');
+}
+
+// ── Export ─────────────────────────────────────────────────────────────────
+function tripsToRows(trips) {
+  return trips.map(t => ({
+    'Fecha': fmtDate(t.date),
+    'Origen': t.origen,
+    'Destino': t.destino,
+    'Motivo': t.motivo,
+    'Km': t.km,
+    '€/km': t.rate,
+    'Importe (€)': t.importe,
+  }));
+}
+
+function exportMonth() {
+  const trips = monthTrips(currentMonth);
+  if (!trips.length) { toast('Sin trayectos para exportar'); return; }
+  const rows = tripsToRows(trips);
+  const total = trips.reduce((s,t) => s+t.importe, 0);
+  const totalKm = trips.reduce((s,t) => s+t.km, 0);
+  rows.push({});
+  rows.push({ 'Fecha': 'TOTAL', 'Km': totalKm, 'Importe (€)': total });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, MONTHS[currentMonth]);
+  XLSX.writeFile(wb, `Gastos_Transporte_${MONTHS[currentMonth]}_2026.xlsx`);
+  toast('Excel exportado ✓');
+}
+
+function exportAll() {
+  const allTrips = getTrips().sort((a,b) => a.date.localeCompare(b.date));
+  if (!allTrips.length) { toast('Sin trayectos registrados'); return; }
+  const wb = XLSX.utils.book_new();
+
+  // One sheet per month
+  ACTIVE_MONTHS.forEach(m => {
+    const trips = allTrips.filter(t => t.month === m)
+                          .sort((a,b) => a.date.localeCompare(b.date));
+    if (!trips.length) return;
+    const rows = tripsToRows(trips);
+    const total = trips.reduce((s,t) => s+t.importe, 0);
+    const totalKm = trips.reduce((s,t) => s+t.km, 0);
+    rows.push({});
+    rows.push({ 'Fecha': 'TOTAL', 'Km': totalKm, 'Importe (€)': total });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, ws, MONTHS[m]);
+  });
+
+  // Summary sheet
+  const sumRows = ACTIVE_MONTHS
+    .map(m => {
+      const trips = allTrips.filter(t => t.month === m);
+      if (!trips.length) return null;
+      return {
+        'Mes': MONTHS[m],
+        'Trayectos': trips.length,
+        'Km totales': trips.reduce((s,t) => s+t.km, 0),
+        'Importe (€)': trips.reduce((s,t) => s+t.importe, 0),
+      };
+    }).filter(Boolean);
+  const total = allTrips.reduce((s,t) => s+t.importe, 0);
+  const totalKm = allTrips.reduce((s,t) => s+t.km, 0);
+  sumRows.push({});
+  sumRows.push({ 'Mes': 'TOTAL', 'Trayectos': allTrips.length, 'Km totales': totalKm, 'Importe (€)': total });
+  const wsSum = XLSX.utils.json_to_sheet(sumRows);
+  wsSum['!cols'] = [{wch:14},{wch:12},{wch:12},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsSum, 'Resumen');
+
+  XLSX.writeFile(wb, 'Gastos_Transporte_2026_Completo.xlsx');
+  toast('Excel completo exportado ✓');
+}
+
+// ── Formatters ─────────────────────────────────────────────────────────────
+function fmt(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+function fmtKm(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function fmtDate(iso) {
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+renderHome();
+</script>
+</body>
+</html>

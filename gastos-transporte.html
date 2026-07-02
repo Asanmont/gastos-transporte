@@ -134,7 +134,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 /* Camera */
 #cam-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 200; flex-direction: column; }
 #cam-overlay.active { display: flex; }
-#cam-video { flex: 1; width: 100%; object-fit: cover; }
+#cam-video { flex: 1; width: 100%; object-fit: cover; display: block; }
 .cam-bar { background: rgba(0,0,0,.88); padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .cam-shoot { width: 66px; height: 66px; border-radius: 50%; background: #fff; border: 5px solid rgba(255,255,255,.35); cursor: pointer; flex-shrink: 0; }
 .cam-cancel { background: none; border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 10px 16px; border-radius: 18px; font-size: 14px; cursor: pointer; }
@@ -600,23 +600,46 @@ function closeCamera() {
 }
 
 function shootPhoto() {
-  const video=document.getElementById('cam-video');
-  const canvas=document.getElementById('canvas');
-  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-  const ctx=canvas.getContext('2d');
-  ctx.drawImage(video,0,0);
-  // Scan filter: grayscale + contrast
-  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
-  const data=img.data;
-  for(let i=0;i<data.length;i+=4){
-    const gray=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
-    const c=Math.min(255,Math.max(0,(gray-128)*1.4+128));
-    data[i]=data[i+1]=data[i+2]=c;
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('canvas');
+
+  // Match the cover crop: calculate which part of the video is visible
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const dw = video.clientWidth,  dh = video.clientHeight;
+  const videoRatio = vw / vh, displayRatio = dw / dh;
+
+  let sx, sy, sw, sh;
+  if (videoRatio > displayRatio) {
+    // video wider than display → crop sides
+    sh = vh; sw = Math.round(vh * displayRatio);
+    sx = Math.round((vw - sw) / 2); sy = 0;
+  } else {
+    // video taller than display → crop top/bottom
+    sw = vw; sh = Math.round(vw / displayRatio);
+    sx = 0; sy = Math.round((vh - sh) / 2);
   }
-  ctx.putImageData(img,0,0);
-  pendingPhoto=canvas.toDataURL('image/jpeg',0.88);
+
+  // Output at display pixel density, max 2400px wide
+  const scale = Math.min(2, 2400 / sw);
+  canvas.width  = Math.round(sw * scale);
+  canvas.height = Math.round(sh * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+  // Aggressive scan filter: grayscale + strong contrast + adaptive threshold feel
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imgData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+    // Strong S-curve: push whites to 255, darks to 0
+    const c = Math.min(255, Math.max(0, (gray - 118) * 2.2 + 118));
+    data[i] = data[i+1] = data[i+2] = c;
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  pendingPhoto = canvas.toDataURL('image/jpeg', 0.92);
   closeCamera();
-  document.getElementById('confirm-img').src=pendingPhoto;
+  document.getElementById('confirm-img').src = pendingPhoto;
   document.getElementById('confirm-overlay').classList.add('active');
 }
 

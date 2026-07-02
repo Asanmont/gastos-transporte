@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Gastos Transporte</title>
 <style>
 :root {
@@ -14,6 +14,7 @@
   --accent2: #7c5cbf;
   --green: #3dbe7a;
   --red: #e05555;
+  --orange: #f0923a;
   --text: #e8eaf0;
   --text2: #8b90a7;
   --text3: #5a5f78;
@@ -23,7 +24,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
-/* ── Layout ── */
 .screen { display: none; flex-direction: column; min-height: 100vh; }
 .screen.active { display: flex; }
 .topbar { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
@@ -32,9 +32,9 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .topbar .icon-btn { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
 .content { flex: 1; padding: 16px; overflow-y: auto; }
 
-/* ── Home ── */
+/* Home */
 .month-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.month-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 16px; cursor: pointer; transition: border-color .2s, background .2s; }
+.month-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 16px; cursor: pointer; }
 .month-card:active { background: var(--surface2); }
 .month-card .m-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
 .month-card .m-stats { font-size: 12px; color: var(--text2); }
@@ -44,48 +44,54 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .total-card .t-amount { font-size: 28px; font-weight: 700; }
 .total-card .t-trips { font-size: 12px; opacity: .7; margin-top: 4px; }
 
-/* ── Buttons ── */
+/* Buttons */
 .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
 .btn:active { opacity: .75; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-green { background: var(--green); color: #fff; }
+.btn-orange { background: var(--orange); color: #fff; }
 .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
 .btn-danger { background: var(--red); color: #fff; }
-.btn-row { display: flex; gap: 10px; }
+.btn-row { display: flex; gap: 8px; }
 .btn-row .btn { flex: 1; }
+.btn-sm { padding: 9px 12px; font-size: 13px; }
 
-/* ── Selector grid ── */
+/* Selector grid */
 .field-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; margin-top: 16px; }
 .sel-grid { display: grid; gap: 8px; }
 .sel-grid.cols2 { grid-template-columns: 1fr 1fr; }
-.sel-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
 .sel-btn { padding: 10px 8px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--text2); cursor: pointer; text-align: center; line-height: 1.3; transition: all .15s; }
 .sel-btn:active { opacity: .7; }
 .sel-btn.selected { border-color: var(--accent); background: rgba(79,142,247,.15); color: var(--text); }
 
-/* ── Text input ── */
+/* Text input */
 .text-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; color: var(--text); font-size: 14px; margin-top: 8px; outline: none; }
 .text-input:focus { border-color: var(--accent); }
 
-/* ── Trip list ── */
+/* Trip list */
 .trip-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-.trip-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; align-items: flex-start; gap: 12px; }
+.trip-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.trip-card .tc-top { display: flex; align-items: flex-start; gap: 10px; }
 .trip-card .tc-main { flex: 1; min-width: 0; }
 .trip-card .tc-date { font-size: 12px; color: var(--text2); margin-bottom: 3px; }
 .trip-card .tc-route { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trip-card .tc-motive { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.trip-card .tc-right { text-align: right; flex-shrink: 0; }
 .trip-card .tc-amount { font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
-.trip-card .tc-km { font-size: 11px; color: var(--text3); text-align: right; }
+.trip-card .tc-km { font-size: 11px; color: var(--text3); }
 .trip-card .del-btn { background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; }
-.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); font-size: 14px; }
+.trip-card .tc-actions { display: flex; gap: 8px; margin-top: 10px; }
+.just-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
+.just-badge.done { background: rgba(61,190,122,.2); color: var(--green); }
+.just-badge.pending { background: var(--surface2); color: var(--text3); }
 
-/* ── Month summary bar ── */
-.month-summary { background: var(--surface2); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); font-size: 14px; }
+.month-summary { background: var(--surface2); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; }
 .ms-label { font-size: 12px; color: var(--text2); }
 .ms-val { font-size: 20px; font-weight: 700; color: var(--accent); }
 .ms-sub { font-size: 11px; color: var(--text3); }
 
-/* ── Config ── */
+/* Config */
 .config-section { margin-bottom: 24px; }
 .config-section h3 { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
 .km-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
@@ -93,22 +99,68 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 .km-input { width: 72px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--text); font-size: 14px; text-align: right; outline: none; flex-shrink: 0; }
 .km-input:focus { border-color: var(--accent); }
 
-/* ── Divider ── */
-.divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-/* ── Toast ── */
-#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ── New trip form ── */
 .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
 .form-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.form-card .form-subtitle { font-size: 12px; color: var(--text2); margin-bottom: 0; }
+.form-card .form-subtitle { font-size: 12px; color: var(--text2); }
+
+/* ── JUSTIFICANTE ── */
+.just-screen-header { background: var(--surface); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; font-size: 13px; color: var(--text2); }
+.just-screen-header strong { color: var(--text); display: block; margin-bottom: 4px; font-size: 14px; }
+
+.doc-slot { border: 2px dashed var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface2); }
+.doc-slot.filled { border-style: solid; border-color: var(--green); }
+.doc-slot img { width: 100%; display: block; max-height: 260px; object-fit: contain; background: #000; }
+.doc-slot .slot-empty { padding: 28px 16px; text-align: center; color: var(--text3); font-size: 13px; }
+.doc-slot .slot-empty .icon { font-size: 30px; margin-bottom: 6px; }
+.doc-actions { display: flex; gap: 8px; margin-top: 8px; margin-bottom: 4px; }
+
+.preview-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; min-height: 92px; align-items: center; }
+.preview-thumb { position: relative; flex-shrink: 0; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid var(--green); background: var(--surface2); }
+.preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.preview-thumb .del-thumb { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,.75); border: none; color: #fff; font-size: 13px; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.add-thumb { flex-shrink: 0; width: 80px; height: 80px; border-radius: 8px; border: 2px dashed var(--border); background: var(--surface2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text3); font-size: 11px; gap: 4px; }
+.add-thumb span { font-size: 22px; }
+
+.section-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+.badge-green { background: rgba(61,190,122,.2); color: var(--green); }
+.badge-gray { background: var(--surface2); color: var(--text3); }
+
+/* Preview pages */
+.page-thumb { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.page-thumb-label { padding: 7px 12px; background: var(--surface2); font-size: 12px; color: var(--text2); }
+.page-thumb img { width: 100%; display: block; max-height: 200px; object-fit: contain; background: #111; }
+
+/* Camera */
+#cam-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 200; flex-direction: column; }
+#cam-overlay.active { display: flex; }
+#cam-video { flex: 1; width: 100%; object-fit: cover; }
+.cam-bar { background: rgba(0,0,0,.88); padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cam-shoot { width: 66px; height: 66px; border-radius: 50%; background: #fff; border: 5px solid rgba(255,255,255,.35); cursor: pointer; flex-shrink: 0; }
+.cam-cancel { background: none; border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 10px 16px; border-radius: 18px; font-size: 14px; cursor: pointer; }
+.cam-label { color: #fff; font-size: 14px; font-weight: 600; flex: 1; text-align: center; }
+
+/* Confirm */
+#confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.93); z-index: 201; flex-direction: column; }
+#confirm-overlay.active { display: flex; }
+#confirm-img { flex: 1; width: 100%; object-fit: contain; }
+.confirm-bar { background: var(--surface); padding: 16px; display: flex; gap: 10px; }
+
+/* Filename input */
+.filename-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-size: 12px; outline: none; font-family: monospace; }
+.filename-input:focus { border-color: var(--accent); }
+
+/* Toast */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.err { background: var(--red); }
+
+canvas { display: none; }
 </style>
 </head>
 <body>
 
-<!-- ══ HOME ══════════════════════════════════════════════════════════════ -->
+<!-- ══ HOME ══════════════════════════════════════════════════════════════════ -->
 <div id="home" class="screen active">
   <div class="topbar">
     <h1>🚗 Gastos Transporte</h1>
@@ -124,7 +176,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
   </div>
 </div>
 
-<!-- ══ MES ════════════════════════════════════════════════════════════════ -->
+<!-- ══ MES ════════════════════════════════════════════════════════════════════ -->
 <div id="month-screen" class="screen">
   <div class="topbar">
     <button class="back" onclick="goHome()">‹</button>
@@ -133,17 +185,14 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
   </div>
   <div class="content">
     <div class="month-summary">
-      <div>
-        <div class="ms-label">Total mes</div>
-        <div class="ms-val" id="month-total-val">0,00 €</div>
-        <div class="ms-sub" id="month-km-val">0 km · 0 trayectos</div>
-      </div>
+      <div class="ms-label">Total mes</div>
+      <div class="ms-val" id="month-total-val">0,00 €</div>
+      <div class="ms-sub" id="month-km-val">0 km · 0 trayectos</div>
     </div>
 
-    <!-- Nuevo trayecto -->
     <div class="form-card">
       <h3>Nuevo trayecto</h3>
-      <div class="form-subtitle">Introduce un trayecto por registro</div>
+      <div class="form-subtitle">Un registro por trayecto</div>
 
       <div class="field-label">Fecha</div>
       <input type="date" id="f-date" class="text-input" style="margin-top:0">
@@ -161,10 +210,10 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
       <input type="text" id="f-motivo-otro" class="text-input" placeholder="Especifica motivo..." style="display:none">
 
       <div class="field-label">Kilómetros</div>
-      <input type="number" id="f-km" class="text-input" placeholder="km (se completa auto desde config)" min="0" step="0.1" style="margin-top:0">
+      <input type="number" id="f-km" class="text-input" placeholder="km (auto desde config)" min="0" step="0.1" style="margin-top:0">
 
-      <div style="margin-top:16px">
-        <button class="btn btn-primary" onclick="addTrip()">Añadir trayecto</button>
+      <div style="margin-top:16px; display:flex; gap:8px;">
+        <button class="btn btn-primary" style="flex:1" onclick="addTrip()">Añadir trayecto</button>
       </div>
     </div>
 
@@ -172,7 +221,36 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
   </div>
 </div>
 
-<!-- ══ CONFIG ═════════════════════════════════════════════════════════════ -->
+<!-- ══ JUSTIFICANTE ═══════════════════════════════════════════════════════════ -->
+<div id="just-screen" class="screen">
+  <div class="topbar">
+    <button class="back" onclick="backFromJust()">‹</button>
+    <h1 id="just-title">Justificante</h1>
+  </div>
+  <div class="content" id="just-content">
+    <!-- rendered dynamically -->
+  </div>
+</div>
+
+<!-- ══ JUST PREVIEW ═══════════════════════════════════════════════════════════ -->
+<div id="just-preview" class="screen">
+  <div class="topbar">
+    <button class="back" onclick="show('just-screen')">‹</button>
+    <h1>Vista previa PDF</h1>
+  </div>
+  <div class="content">
+    <div style="margin-bottom:14px">
+      <div class="field-label" style="margin-top:0">Nombre del archivo</div>
+      <input type="text" id="p-filename" class="filename-input">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px" id="preview-pages"></div>
+    <button class="btn btn-green" onclick="savePDF()">💾 Guardar PDF</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-outline" onclick="show('just-screen')">← Volver a editar</button>
+  </div>
+</div>
+
+<!-- ══ CONFIG ══════════════════════════════════════════════════════════════════ -->
 <div id="config-screen" class="screen">
   <div class="topbar">
     <button class="back" onclick="goHome()">‹</button>
@@ -189,215 +267,189 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
     </div>
     <div class="config-section">
       <h3>Distancias por trayecto (km)</h3>
-      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Los pares simétricos se rellenan automáticamente. Deja en 0 los trayectos que no uses.</p>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Pares simétricos. Deja en 0 los que no uses.</p>
       <div id="km-pairs"></div>
     </div>
     <button class="btn btn-green" onclick="saveConfig()">Guardar configuración</button>
   </div>
 </div>
 
+<!-- ══ CÁMARA ══════════════════════════════════════════════════════════════════ -->
+<div id="cam-overlay">
+  <video id="cam-video" autoplay playsinline muted></video>
+  <div class="cam-bar">
+    <button class="cam-cancel" onclick="closeCamera()">Cancelar</button>
+    <div class="cam-label" id="cam-label">Documento</div>
+    <button class="cam-shoot" onclick="shootPhoto()"></button>
+  </div>
+</div>
+
+<!-- ══ CONFIRMAR FOTO ══════════════════════════════════════════════════════════ -->
+<div id="confirm-overlay">
+  <img id="confirm-img" src="">
+  <div class="confirm-bar">
+    <button class="btn btn-outline" onclick="retakePhoto()" style="flex:1">↩ Repetir</button>
+    <button class="btn btn-green" onclick="acceptPhoto()" style="flex:1">✓ Usar esta</button>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+<input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(event)">
+<input type="file" id="maps-input" accept="image/*" multiple style="display:none" onchange="handleMaps(event)">
 <div id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-// ── Constants ──────────────────────────────────────────────────────────────
-const LUGARES = [
-  'Casa',
-  'Homebox Sevilla',
-  'Zebrabox Sevilla',
-  'Medihp Tomares',
-  'Medihp Sevilla',
-  'Viamed Fátima',
-  'Clínica Osten',
-  'Fremap Mutua Trabajo',
-  'Centro Salud Mairena',
-  'Despacho Abogados',
-  'Otros',
-];
+const { jsPDF } = window.jspdf;
 
-const MOTIVOS = [
-  'Rehabilitación',
-  'Consulta Rehabilitador',
-  'Consulta Psiquiatra',
-  'Consulta Psicólogo',
-  'Consulta Traumatólogo',
-  'Pruebas Médicas',
-  'Peritaje MMA',
-  'Peritaje Propio',
-  'Reunión Abogados',
-  'Otros',
-];
-
+// ── Constants ──────────────────────────────────────────────────────────────────
+const LUGARES = ['Casa','Homebox Sevilla','Zebrabox Sevilla','Medihp Tomares','Medihp Sevilla',
+  'Viamed Fátima','Clínica Osten','Fremap Mutua Trabajo','Centro Salud Mairena','Despacho Abogados','Otros'];
+const MOTIVOS = ['Rehabilitación','Consulta Rehabilitador','Consulta Psiquiatra','Consulta Psicólogo',
+  'Consulta Traumatólogo','Pruebas Médicas','Peritaje MMA','Peritaje Propio','Reunión Abogados','Otros'];
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const ACTIVE_MONTHS = [5,6,7,8,9,10,11]; // 0-indexed June=5 ... Dec=11
-const RATE_KEY = 'gt_rate';
+const ACTIVE_MONTHS = [5,6,7,8,9,10,11];
+
+const RATE_KEY  = 'gt_rate';
 const TRIPS_KEY = 'gt_trips';
-const KM_KEY = 'gt_km';
+const KM_KEY    = 'gt_km';
+const JUST_KEY  = 'gt_just'; // {tripId: {just, park, maps[]}}
 
-// ── State ──────────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────────────
 let currentMonth = null;
-let selOrigen = null;
-let selDestino = null;
-let selMotivo = null;
+let selOrigen = null, selDestino = null, selMotivo = null;
 
-// ── Storage ────────────────────────────────────────────────────────────────
-function getRate() { return parseFloat(localStorage.getItem(RATE_KEY) || '0.26'); }
-function getTrips() { try { return JSON.parse(localStorage.getItem(TRIPS_KEY) || '[]'); } catch(e){return [];} }
-function saveTrips(t) { localStorage.setItem(TRIPS_KEY, JSON.stringify(t)); }
-function getKmMap() { try { return JSON.parse(localStorage.getItem(KM_KEY) || '{}'); } catch(e){return {};} }
-function saveKmMap(m) { localStorage.setItem(KM_KEY, JSON.stringify(m)); }
+// Justificante state
+let justTripId  = null;   // trip we're building justificante for
+let justDocs    = { just: null, park: null, maps: [] };
+let camTarget   = null;
+let camStream   = null;
+let pendingPhoto= null;
+let fileTarget  = null;
 
-function kmKey(a, b) { return [a,b].sort().join('|||'); }
-function getKm(a, b) {
-  if (!a || !b || a === b) return 0;
-  const map = getKmMap();
-  return parseFloat(map[kmKey(a,b)] || 0);
-}
+// ── Storage ────────────────────────────────────────────────────────────────────
+const getRate  = () => parseFloat(localStorage.getItem(RATE_KEY) || '0.26');
+const getTrips = () => { try { return JSON.parse(localStorage.getItem(TRIPS_KEY)||'[]'); } catch(e){return[];} };
+const saveTrips= t  => localStorage.setItem(TRIPS_KEY, JSON.stringify(t));
+const getKmMap = () => { try { return JSON.parse(localStorage.getItem(KM_KEY)||'{}'); } catch(e){return{};} };
+const saveKmMap= m  => localStorage.setItem(KM_KEY, JSON.stringify(m));
+const getJusts = () => { try { return JSON.parse(localStorage.getItem(JUST_KEY)||'{}'); } catch(e){return{};} };
+const saveJusts= j  => localStorage.setItem(JUST_KEY, JSON.stringify(j));
 
-// ── Navigation ─────────────────────────────────────────────────────────────
+const kmKey = (a,b) => [a,b].sort().join('|||');
+const getKm = (a,b) => {
+  if (!a||!b||a===b) return 0;
+  return parseFloat(getKmMap()[kmKey(a,b)]||0);
+};
+
+// ── Navigation ─────────────────────────────────────────────────────────────────
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
 }
-function goHome() { renderHome(); show('home'); }
+function goHome()   { renderHome(); show('home'); }
 function goConfig() { renderConfig(); show('config-screen'); }
+function backFromJust() { goMonth(currentMonth); }
 
+// ── Month screen ───────────────────────────────────────────────────────────────
 function goMonth(m) {
   currentMonth = m;
-  document.getElementById('month-title').textContent = MONTHS[m] + ' 2026';
-  selOrigen = null; selDestino = null; selMotivo = null;
-  // Set today's date
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth()+1).padStart(2,'0');
-  const dd = String(today.getDate()).padStart(2,'0');
-  document.getElementById('f-date').value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById('f-km').value = '';
-  document.getElementById('f-origen-otro').style.display = 'none';
-  document.getElementById('f-destino-otro').style.display = 'none';
-  document.getElementById('f-motivo-otro').style.display = 'none';
-  renderSelectorGrid('grid-origen', LUGARES, 'origen');
-  renderSelectorGrid('grid-destino', LUGARES, 'destino');
-  renderSelectorGrid('grid-motivo', MOTIVOS, 'motivo');
+  document.getElementById('month-title').textContent = MONTHS[m]+' 2026';
+  selOrigen=null; selDestino=null; selMotivo=null;
+  const today=new Date();
+  document.getElementById('f-date').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  document.getElementById('f-km').value='';
+  ['f-origen-otro','f-destino-otro','f-motivo-otro'].forEach(id=>document.getElementById(id).style.display='none');
+  renderSelectorGrid('grid-origen',LUGARES,'origen');
+  renderSelectorGrid('grid-destino',LUGARES,'destino');
+  renderSelectorGrid('grid-motivo',MOTIVOS,'motivo');
   renderTripList();
   renderMonthSummary();
   show('month-screen');
 }
 
-// ── Selector grids ─────────────────────────────────────────────────────────
-function renderSelectorGrid(gridId, items, type) {
-  const grid = document.getElementById(gridId);
-  grid.innerHTML = items.map(item => 
-    `<button class="sel-btn" onclick="selectItem('${type}','${item}',this)">${item}</button>`
+// ── Selectors ──────────────────────────────────────────────────────────────────
+function renderSelectorGrid(gridId,items,type) {
+  document.getElementById(gridId).innerHTML = items.map(item=>
+    `<button class="sel-btn" onclick="selectItem('${type}','${item.replace(/'/g,"\\'")}',this)">${item}</button>`
   ).join('');
 }
 
-function selectItem(type, val, btn) {
-  const gridId = type === 'origen' ? 'grid-origen' : type === 'destino' ? 'grid-destino' : 'grid-motivo';
-  document.querySelectorAll(`#${gridId} .sel-btn`).forEach(b => b.classList.remove('selected'));
+function selectItem(type,val,btn) {
+  const gridId=`grid-${type}`;
+  document.querySelectorAll(`#${gridId} .sel-btn`).forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
-
-  const otroId = type === 'origen' ? 'f-origen-otro' : type === 'destino' ? 'f-destino-otro' : 'f-motivo-otro';
-  document.getElementById(otroId).style.display = val === 'Otros' ? 'block' : 'none';
-
-  if (type === 'origen') selOrigen = val;
-  else if (type === 'destino') selDestino = val;
-  else selMotivo = val;
-
-  // Auto-fill km
-  if (type === 'origen' || type === 'destino') {
-    const o = type === 'origen' ? val : selOrigen;
-    const d = type === 'destino' ? val : selDestino;
-    if (o && d && o !== 'Otros' && d !== 'Otros') {
-      const km = getKm(o, d);
-      if (km > 0) document.getElementById('f-km').value = km;
+  const otroId=`f-${type}-otro`;
+  const showOtro = val==='Otros'||(type==='motivo'&&val==='Pruebas Médicas');
+  document.getElementById(otroId).style.display=showOtro?'block':'none';
+  if(type==='origen') selOrigen=val;
+  else if(type==='destino') selDestino=val;
+  else selMotivo=val;
+  if(type==='origen'||type==='destino'){
+    const o=type==='origen'?val:selOrigen;
+    const d=type==='destino'?val:selDestino;
+    if(o&&d&&o!=='Otros'&&d!=='Otros'){
+      const km=getKm(o,d);
+      if(km>0) document.getElementById('f-km').value=km;
     }
   }
 }
 
-// ── Trip CRUD ──────────────────────────────────────────────────────────────
+// ── Add trip ───────────────────────────────────────────────────────────────────
 function addTrip() {
-  const date = document.getElementById('f-date').value;
-  if (!date) { toast('Indica la fecha'); return; }
-  if (!selOrigen) { toast('Selecciona origen'); return; }
-  if (!selDestino) { toast('Selecciona destino'); return; }
-  if (selOrigen === selDestino) { toast('Origen y destino no pueden ser iguales'); return; }
-  if (!selMotivo) { toast('Selecciona motivo'); return; }
+  const date=document.getElementById('f-date').value;
+  if(!date){toast('Indica la fecha');return;}
+  if(!selOrigen){toast('Selecciona origen');return;}
+  if(!selDestino){toast('Selecciona destino');return;}
+  if(selOrigen===selDestino){toast('Origen y destino iguales');return;}
+  if(!selMotivo){toast('Selecciona motivo');return;}
+  const km=parseFloat(document.getElementById('f-km').value||0);
+  if(km<=0){toast('Indica los kilómetros');return;}
 
-  const origenFinal = selOrigen === 'Otros'
-    ? (document.getElementById('f-origen-otro').value.trim() || 'Otros')
-    : selOrigen;
-  const destinoFinal = selDestino === 'Otros'
-    ? (document.getElementById('f-destino-otro').value.trim() || 'Otros')
-    : selDestino;
-  const motivoFinal = selMotivo === 'Otros'
-    ? (document.getElementById('f-motivo-otro').value.trim() || 'Otros')
-    : selMotivo === 'Pruebas Médicas'
-      ? (document.getElementById('f-motivo-otro').value.trim() || 'Pruebas Médicas')
-      : selMotivo;
+  const origenFinal  = selOrigen==='Otros'?(document.getElementById('f-origen-otro').value.trim()||'Otros'):selOrigen;
+  const destinoFinal = selDestino==='Otros'?(document.getElementById('f-destino-otro').value.trim()||'Otros'):selDestino;
+  const motivoFinal  = (selMotivo==='Otros'||selMotivo==='Pruebas Médicas')
+    ?(document.getElementById('f-motivo-otro').value.trim()||selMotivo):selMotivo;
 
-  const km = parseFloat(document.getElementById('f-km').value || 0);
-  if (km <= 0) { toast('Indica los kilómetros'); return; }
-
-  const rate = getRate();
-  const importe = Math.round(km * rate * 100) / 100;
-
-  const trips = getTrips();
-  trips.push({
-    id: Date.now(),
-    month: currentMonth,
-    date,
-    origen: origenFinal,
-    destino: destinoFinal,
-    motivo: motivoFinal,
-    km,
-    rate,
-    importe,
-  });
+  const rate=getRate();
+  const importe=Math.round(km*rate*100)/100;
+  const trips=getTrips();
+  trips.push({ id:Date.now(), month:currentMonth, date, origen:origenFinal, destino:destinoFinal, motivo:motivoFinal, km, rate, importe });
   saveTrips(trips);
 
-  // Reset form
-  selOrigen = null; selDestino = null; selMotivo = null;
-  document.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('f-km').value = '';
-  document.getElementById('f-origen-otro').style.display = 'none';
-  document.getElementById('f-destino-otro').style.display = 'none';
-  document.getElementById('f-motivo-otro').style.display = 'none';
-
-  renderTripList();
-  renderMonthSummary();
-  renderHome();
+  selOrigen=null; selDestino=null; selMotivo=null;
+  document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('f-km').value='';
+  ['f-origen-otro','f-destino-otro','f-motivo-otro'].forEach(id=>document.getElementById(id).style.display='none');
+  renderTripList(); renderMonthSummary(); renderHome();
   toast('Trayecto añadido ✓');
 }
 
 function deleteTrip(id) {
-  if (!confirm('¿Eliminar este trayecto?')) return;
-  saveTrips(getTrips().filter(t => t.id !== id));
-  renderTripList();
-  renderMonthSummary();
-  renderHome();
+  if(!confirm('¿Eliminar este trayecto?')) return;
+  saveTrips(getTrips().filter(t=>t.id!==id));
+  // also remove justificante data
+  const justs=getJusts(); delete justs[id]; saveJusts(justs);
+  renderTripList(); renderMonthSummary(); renderHome();
 }
 
 function monthTrips(m) {
-  return getTrips()
-    .filter(t => t.month === m)
-    .sort((a,b) => a.date.localeCompare(b.date));
+  return getTrips().filter(t=>t.month===m).sort((a,b)=>a.date.localeCompare(b.date));
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────────
 function renderHome() {
-  const trips = getTrips();
-  const total = trips.reduce((s,t) => s+t.importe, 0);
-  const totalKm = trips.reduce((s,t) => s+t.km, 0);
-  document.getElementById('home-total').textContent = fmt(total);
-  document.getElementById('home-trips').textContent = `${trips.length} trayectos · ${fmtKm(totalKm)} km`;
-
-  const grid = document.getElementById('month-grid');
-  grid.innerHTML = ACTIVE_MONTHS.map(m => {
-    const mt = monthTrips(m);
-    const mTotal = mt.reduce((s,t) => s+t.importe, 0);
-    const mKm = mt.reduce((s,t) => s+t.km, 0);
+  const trips=getTrips();
+  const total=trips.reduce((s,t)=>s+t.importe,0);
+  const totalKm=trips.reduce((s,t)=>s+t.km,0);
+  document.getElementById('home-total').textContent=fmt(total);
+  document.getElementById('home-trips').textContent=`${trips.length} trayectos · ${fmtKm(totalKm)} km`;
+  document.getElementById('month-grid').innerHTML=ACTIVE_MONTHS.map(m=>{
+    const mt=monthTrips(m);
+    const mTotal=mt.reduce((s,t)=>s+t.importe,0);
+    const mKm=mt.reduce((s,t)=>s+t.km,0);
     return `<div class="month-card" onclick="goMonth(${m})">
       <div class="m-name">${MONTHS[m]}</div>
       <div class="m-stats">${mt.length} trayectos · ${fmtKm(mKm)} km</div>
@@ -407,166 +459,394 @@ function renderHome() {
 }
 
 function renderMonthSummary() {
-  const mt = monthTrips(currentMonth);
-  const total = mt.reduce((s,t) => s+t.importe, 0);
-  const km = mt.reduce((s,t) => s+t.km, 0);
-  document.getElementById('month-total-val').textContent = fmt(total);
-  document.getElementById('month-km-val').textContent = `${fmtKm(km)} km · ${mt.length} trayectos`;
+  const mt=monthTrips(currentMonth);
+  document.getElementById('month-total-val').textContent=fmt(mt.reduce((s,t)=>s+t.importe,0));
+  document.getElementById('month-km-val').textContent=`${fmtKm(mt.reduce((s,t)=>s+t.km,0))} km · ${mt.length} trayectos`;
 }
 
 function renderTripList() {
-  const list = document.getElementById('trip-list');
-  const mt = monthTrips(currentMonth);
-  if (!mt.length) {
-    list.innerHTML = '<div class="empty-state">Sin trayectos registrados este mes</div>';
-    return;
-  }
-  list.innerHTML = mt.map(t => `
-    <div class="trip-card">
-      <div class="tc-main">
-        <div class="tc-date">${fmtDate(t.date)}</div>
-        <div class="tc-route">${t.origen} → ${t.destino}</div>
-        <div class="tc-motive">${t.motivo}</div>
+  const list=document.getElementById('trip-list');
+  const mt=monthTrips(currentMonth);
+  const justs=getJusts();
+  if(!mt.length){ list.innerHTML='<div class="empty-state">Sin trayectos este mes</div>'; return; }
+  list.innerHTML=mt.map(t=>{
+    const hasJust=!!(justs[t.id]&&(justs[t.id].just||justs[t.id].park||justs[t.id].maps?.length));
+    const badge=hasJust
+      ?`<span class="just-badge done">📄 Justificante ✓</span>`
+      :`<span class="just-badge pending">📄 Sin justificante</span>`;
+    return `<div class="trip-card">
+      <div class="tc-top">
+        <div class="tc-main">
+          <div class="tc-date">${fmtDate(t.date)}</div>
+          <div class="tc-route">${t.origen} → ${t.destino}</div>
+          <div class="tc-motive">${t.motivo}</div>
+        </div>
+        <div class="tc-right">
+          <div class="tc-amount">${fmt(t.importe)}</div>
+          <div class="tc-km">${fmtKm(t.km)} km</div>
+        </div>
+        <button class="del-btn" onclick="deleteTrip(${t.id})">×</button>
       </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div class="tc-amount">${fmt(t.importe)}</div>
-        <div class="tc-km">${fmtKm(t.km)} km</div>
+      <div class="tc-actions">
+        ${badge}
+        <button class="btn btn-orange btn-sm" style="flex:0 0 auto;width:auto;padding:6px 14px" onclick="goJust(${t.id})">
+          ${hasJust?'✏️ Editar':'📄 Justificante'}
+        </button>
       </div>
-      <button class="del-btn" onclick="deleteTrip(${t.id})">×</button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
-function renderConfig() {
-  document.getElementById('cfg-rate').value = getRate();
-  const map = getKmMap();
-  const container = document.getElementById('km-pairs');
+// ── Justificante ───────────────────────────────────────────────────────────────
+function goJust(tripId) {
+  justTripId=tripId;
+  const trip=getTrips().find(t=>t.id===tripId);
+  const saved=getJusts()[tripId]||{};
+  justDocs={ just:saved.just||null, park:saved.park||null, maps:[...(saved.maps||[])] };
 
-  // Generate all pairs (upper triangle only, symmetric)
-  const pairs = [];
-  for (let i = 0; i < LUGARES.length - 1; i++) { // exclude 'Otros'
-    for (let j = i+1; j < LUGARES.length - 1; j++) {
-      pairs.push([LUGARES[i], LUGARES[j]]);
-    }
+  // Determine sentido heuristically: if destino===Casa → vuelta, else ida
+  const sentido = trip.destino==='Casa'?'vuelta':'ida';
+  const [y,m,d]=trip.date.split('-');
+  const dateCode=`${d}${m}${y.slice(2)}`;
+  const filename=`${dateCode}_Gasto_Vehículo_Propio_${trip.motivo.replace(/ /g,'_')}_(${sentido}).pdf`;
+
+  document.getElementById('just-title').textContent='Justificante';
+  document.getElementById('p-filename').value=filename;
+
+  renderJustScreen(trip, sentido);
+  show('just-screen');
+}
+
+function renderJustScreen(trip, sentido) {
+  const [y,m,d]=trip.date.split('-');
+  const sentidoLabel=sentido==='ida'?'Ida ▶':'◀ Vuelta';
+  document.getElementById('just-content').innerHTML=`
+    <div class="just-screen-header">
+      <strong>${fmtDate(trip.date)} · ${sentidoLabel}</strong>
+      ${trip.origen} → ${trip.destino} · ${trip.motivo}
+    </div>
+
+    <!-- 1. Justificante asistencia -->
+    <div class="form-card" style="margin-bottom:14px">
+      <div class="section-title">
+        <span>1 · Justificante asistencia</span>
+        <span id="b-just" class="badge ${justDocs.just?'badge-green':'badge-gray'}">${justDocs.just?'✓ Listo':'Pendiente'}</span>
+      </div>
+      <div class="doc-slot ${justDocs.just?'filled':''}" id="slot-just">
+        ${justDocs.just?`<img src="${justDocs.just}">`:`<div class="slot-empty"><div class="icon">📋</div>Sin documento</div>`}
+      </div>
+      <div class="doc-actions">
+        <button class="btn btn-primary btn-sm" onclick="openCamera('just')">📷 Cámara</button>
+        <button class="btn btn-outline btn-sm" onclick="pickFile('just')">🖼 Galería</button>
+        ${justDocs.just?`<button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="clearDoc('just')">✕</button>`:''}
+      </div>
+    </div>
+
+    <!-- 2. Ticket parking -->
+    <div class="form-card" style="margin-bottom:14px">
+      <div class="section-title">
+        <span>2 · Ticket parking</span>
+        <span id="b-park" class="badge ${justDocs.park?'badge-green':'badge-gray'}">${justDocs.park?'✓ Listo':'Pendiente'}</span>
+      </div>
+      <div class="doc-slot ${justDocs.park?'filled':''}" id="slot-park">
+        ${justDocs.park?`<img src="${justDocs.park}">`:`<div class="slot-empty"><div class="icon">🅿️</div>Sin documento</div>`}
+      </div>
+      <div class="doc-actions">
+        <button class="btn btn-primary btn-sm" onclick="openCamera('park')">📷 Cámara</button>
+        <button class="btn btn-outline btn-sm" onclick="pickFile('park')">🖼 Galería</button>
+        ${justDocs.park?`<button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="clearDoc('park')">✕</button>`:''}
+      </div>
+    </div>
+
+    <!-- 3. Maps -->
+    <div class="form-card" style="margin-bottom:14px">
+      <div class="section-title">
+        <span>3 · Capturas Google Maps</span>
+        <span id="b-maps" class="badge ${justDocs.maps.length?'badge-green':'badge-gray'}">${justDocs.maps.length?`✓ ${justDocs.maps.length} img`:'Pendiente'}</span>
+      </div>
+      <div class="preview-strip" id="maps-strip"></div>
+    </div>
+
+    <button class="btn btn-green" onclick="goJustPreview()">Vista previa PDF →</button>
+  `;
+  renderMapsStrip();
+}
+
+function clearDoc(target) {
+  justDocs[target]=null;
+  reRenderJust();
+}
+
+function reRenderJust() {
+  const trip=getTrips().find(t=>t.id===justTripId);
+  const sentido=trip.destino==='Casa'?'vuelta':'ida';
+  renderJustScreen(trip, sentido);
+}
+
+// ── Camera & file ──────────────────────────────────────────────────────────────
+async function openCamera(target) {
+  camTarget=target;
+  document.getElementById('cam-label').textContent=target==='just'?'Escanear justificante':'Escanear ticket parking';
+  try {
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:2560}}});
+    document.getElementById('cam-video').srcObject=camStream;
+    document.getElementById('cam-overlay').classList.add('active');
+  } catch(e){ toast('Sin acceso a cámara',true); }
+}
+
+function closeCamera() {
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  document.getElementById('cam-overlay').classList.remove('active');
+}
+
+function shootPhoto() {
+  const video=document.getElementById('cam-video');
+  const canvas=document.getElementById('canvas');
+  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0);
+  // Scan filter: grayscale + contrast
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const data=img.data;
+  for(let i=0;i<data.length;i+=4){
+    const gray=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
+    const c=Math.min(255,Math.max(0,(gray-128)*1.4+128));
+    data[i]=data[i+1]=data[i+2]=c;
+  }
+  ctx.putImageData(img,0,0);
+  pendingPhoto=canvas.toDataURL('image/jpeg',0.88);
+  closeCamera();
+  document.getElementById('confirm-img').src=pendingPhoto;
+  document.getElementById('confirm-overlay').classList.add('active');
+}
+
+function retakePhoto() {
+  document.getElementById('confirm-overlay').classList.remove('active');
+  pendingPhoto=null; openCamera(camTarget);
+}
+
+function acceptPhoto() {
+  document.getElementById('confirm-overlay').classList.remove('active');
+  applyPhoto(camTarget,pendingPhoto); pendingPhoto=null;
+}
+
+function pickFile(target) { fileTarget=target; document.getElementById('file-input').click(); }
+
+function handleFile(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>applyPhoto(fileTarget,ev.target.result);
+  reader.readAsDataURL(file); e.target.value='';
+}
+
+function applyPhoto(target,dataUrl) {
+  justDocs[target]=dataUrl;
+  reRenderJust();
+  saveJustDraft();
+}
+
+function pickMaps() { document.getElementById('maps-input').click(); }
+
+function handleMaps(e) {
+  const files=Array.from(e.target.files); let loaded=0;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      justDocs.maps.push(ev.target.result); loaded++;
+      if(loaded===files.length){ renderMapsStrip(); updateMapsBadge(); saveJustDraft(); }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function renderMapsStrip() {
+  const strip=document.getElementById('maps-strip');
+  if(!strip) return;
+  strip.innerHTML=justDocs.maps.map((src,i)=>
+    `<div class="preview-thumb">
+      <img src="${src}">
+      <button class="del-thumb" onclick="removeMap(${i})">×</button>
+    </div>`
+  ).join('')+`<div class="add-thumb" onclick="pickMaps()"><span>＋</span>Añadir</div>`;
+}
+
+function updateMapsBadge() {
+  const b=document.getElementById('b-maps');
+  if(!b) return;
+  b.className='badge '+(justDocs.maps.length?'badge-green':'badge-gray');
+  b.textContent=justDocs.maps.length?`✓ ${justDocs.maps.length} img`:'Pendiente';
+}
+
+function removeMap(i) {
+  justDocs.maps.splice(i,1); renderMapsStrip(); updateMapsBadge(); saveJustDraft();
+}
+
+function saveJustDraft() {
+  const justs=getJusts();
+  justs[justTripId]={ just:justDocs.just, park:justDocs.park, maps:justDocs.maps };
+  saveJusts(justs);
+}
+
+// ── Preview & PDF ──────────────────────────────────────────────────────────────
+function goJustPreview() {
+  if(!justDocs.just&&!justDocs.park&&!justDocs.maps.length){
+    toast('Añade al menos un documento',true); return;
+  }
+  const pages=[];
+  if(justDocs.just) pages.push({label:'Justificante de asistencia',src:justDocs.just});
+  if(justDocs.park) pages.push({label:'Ticket de parking',src:justDocs.park});
+  justDocs.maps.forEach((src,i)=>pages.push({label:`Captura Google Maps ${i+1}`,src}));
+
+  document.getElementById('preview-pages').innerHTML=pages.map((p,i)=>
+    `<div class="page-thumb">
+      <div class="page-thumb-label">Pág. ${i+1} · ${p.label}</div>
+      <img src="${p.src}">
+    </div>`
+  ).join('');
+  show('just-preview');
+}
+
+async function savePDF() {
+  const pages=[];
+  if(justDocs.just) pages.push(justDocs.just);
+  if(justDocs.park) pages.push(justDocs.park);
+  justDocs.maps.forEach(src=>pages.push(src));
+  if(!pages.length){ toast('Sin páginas',true); return; }
+
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=210,H=297;
+  for(let i=0;i<pages.length;i++){
+    if(i>0) pdf.addPage();
+    await new Promise(resolve=>{
+      const img=new Image();
+      img.onload=()=>{
+        const ratio=img.width/img.height;
+        let iw,ih;
+        if(ratio>W/H){iw=W;ih=W/ratio;}else{ih=H;iw=H*ratio;}
+        pdf.addImage(pages[i],pages[i].startsWith('data:image/png')?'PNG':'JPEG',(W-iw)/2,(H-ih)/2,iw,ih);
+        resolve();
+      };
+      img.src=pages[i];
+    });
   }
 
-  container.innerHTML = pairs.map(([a,b]) => {
-    const k = kmKey(a,b);
-    const val = map[k] || '';
+  const filename=document.getElementById('p-filename').value.trim()||'justificante.pdf';
+  const blob=pdf.output('blob');
+
+  if(window.showSaveFilePicker){
+    try{
+      const handle=await window.showSaveFilePicker({
+        suggestedName:filename,
+        types:[{description:'PDF',accept:{'application/pdf':['.pdf']}}]
+      });
+      const w=await handle.createWritable();
+      await w.write(blob); await w.close();
+      // mark as done
+      saveJustDraft();
+      renderTripList();
+      toast('PDF guardado ✓');
+      setTimeout(()=>show('month-screen'),1000);
+      return;
+    } catch(e){ if(e.name==='AbortError') return; }
+  }
+  // fallback
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  saveJustDraft(); renderTripList();
+  toast('PDF descargado ✓');
+  setTimeout(()=>show('month-screen'),1000);
+}
+
+// ── Config ─────────────────────────────────────────────────────────────────────
+function renderConfig() {
+  document.getElementById('cfg-rate').value=getRate();
+  const map=getKmMap();
+  const pairs=[];
+  for(let i=0;i<LUGARES.length-1;i++)
+    for(let j=i+1;j<LUGARES.length-1;j++)
+      pairs.push([LUGARES[i],LUGARES[j]]);
+  document.getElementById('km-pairs').innerHTML=pairs.map(([a,b])=>{
+    const k=kmKey(a,b);
     return `<div class="km-row">
       <label>${a}<br><span style="color:var(--text3)">→ ${b}</span></label>
-      <input type="number" class="km-input" data-pair="${k}" data-a="${a}" data-b="${b}"
-             value="${val}" min="0" step="0.1" placeholder="0">
+      <input type="number" class="km-input" data-pair="${k}" value="${map[k]||''}" min="0" step="0.1" placeholder="0">
     </div>`;
   }).join('');
 }
 
 function saveConfig() {
-  const rate = parseFloat(document.getElementById('cfg-rate').value || '0.26');
-  localStorage.setItem(RATE_KEY, rate);
-
-  const map = getKmMap();
-  document.querySelectorAll('.km-input[data-pair]').forEach(input => {
-    const k = input.dataset.pair;
-    const val = parseFloat(input.value || 0);
-    if (val > 0) map[k] = val;
-    else delete map[k];
+  localStorage.setItem(RATE_KEY,parseFloat(document.getElementById('cfg-rate').value||'0.26'));
+  const map=getKmMap();
+  document.querySelectorAll('.km-input[data-pair]').forEach(input=>{
+    const val=parseFloat(input.value||0);
+    if(val>0) map[input.dataset.pair]=val;
+    else delete map[input.dataset.pair];
   });
   saveKmMap(map);
   toast('Configuración guardada ✓');
 }
 
-// ── Export ─────────────────────────────────────────────────────────────────
+// ── Export ─────────────────────────────────────────────────────────────────────
 function tripsToRows(trips) {
-  return trips.map(t => ({
-    'Fecha': fmtDate(t.date),
-    'Origen': t.origen,
-    'Destino': t.destino,
-    'Motivo': t.motivo,
-    'Km': t.km,
-    '€/km': t.rate,
-    'Importe (€)': t.importe,
-  }));
+  return trips.map(t=>({'Fecha':fmtDate(t.date),'Origen':t.origen,'Destino':t.destino,'Motivo':t.motivo,'Km':t.km,'€/km':t.rate,'Importe (€)':t.importe}));
 }
 
 function exportMonth() {
-  const trips = monthTrips(currentMonth);
-  if (!trips.length) { toast('Sin trayectos para exportar'); return; }
-  const rows = tripsToRows(trips);
-  const total = trips.reduce((s,t) => s+t.importe, 0);
-  const totalKm = trips.reduce((s,t) => s+t.km, 0);
-  rows.push({});
-  rows.push({ 'Fecha': 'TOTAL', 'Km': totalKm, 'Importe (€)': total });
-
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, MONTHS[currentMonth]);
-  XLSX.writeFile(wb, `Gastos_Transporte_${MONTHS[currentMonth]}_2026.xlsx`);
+  const trips=monthTrips(currentMonth);
+  if(!trips.length){toast('Sin trayectos');return;}
+  const rows=tripsToRows(trips);
+  rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)});
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,MONTHS[currentMonth]);
+  XLSX.writeFile(wb,`Gastos_Transporte_${MONTHS[currentMonth]}_2026.xlsx`);
   toast('Excel exportado ✓');
 }
 
 function exportAll() {
-  const allTrips = getTrips().sort((a,b) => a.date.localeCompare(b.date));
-  if (!allTrips.length) { toast('Sin trayectos registrados'); return; }
-  const wb = XLSX.utils.book_new();
-
-  // One sheet per month
-  ACTIVE_MONTHS.forEach(m => {
-    const trips = allTrips.filter(t => t.month === m)
-                          .sort((a,b) => a.date.localeCompare(b.date));
-    if (!trips.length) return;
-    const rows = tripsToRows(trips);
-    const total = trips.reduce((s,t) => s+t.importe, 0);
-    const totalKm = trips.reduce((s,t) => s+t.km, 0);
-    rows.push({});
-    rows.push({ 'Fecha': 'TOTAL', 'Km': totalKm, 'Importe (€)': total });
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
-    XLSX.utils.book_append_sheet(wb, ws, MONTHS[m]);
+  const allTrips=getTrips().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!allTrips.length){toast('Sin trayectos');return;}
+  const wb=XLSX.utils.book_new();
+  ACTIVE_MONTHS.forEach(m=>{
+    const trips=allTrips.filter(t=>t.month===m);
+    if(!trips.length) return;
+    const rows=tripsToRows(trips);
+    rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)});
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws,MONTHS[m]);
   });
-
-  // Summary sheet
-  const sumRows = ACTIVE_MONTHS
-    .map(m => {
-      const trips = allTrips.filter(t => t.month === m);
-      if (!trips.length) return null;
-      return {
-        'Mes': MONTHS[m],
-        'Trayectos': trips.length,
-        'Km totales': trips.reduce((s,t) => s+t.km, 0),
-        'Importe (€)': trips.reduce((s,t) => s+t.importe, 0),
-      };
-    }).filter(Boolean);
-  const total = allTrips.reduce((s,t) => s+t.importe, 0);
-  const totalKm = allTrips.reduce((s,t) => s+t.km, 0);
-  sumRows.push({});
-  sumRows.push({ 'Mes': 'TOTAL', 'Trayectos': allTrips.length, 'Km totales': totalKm, 'Importe (€)': total });
-  const wsSum = XLSX.utils.json_to_sheet(sumRows);
-  wsSum['!cols'] = [{wch:14},{wch:12},{wch:12},{wch:14}];
-  XLSX.utils.book_append_sheet(wb, wsSum, 'Resumen');
-
-  XLSX.writeFile(wb, 'Gastos_Transporte_2026_Completo.xlsx');
+  const sumRows=ACTIVE_MONTHS.map(m=>{
+    const trips=allTrips.filter(t=>t.month===m);
+    if(!trips.length) return null;
+    return{'Mes':MONTHS[m],'Trayectos':trips.length,'Km totales':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)};
+  }).filter(Boolean);
+  sumRows.push({},{'Mes':'TOTAL','Trayectos':allTrips.length,'Km totales':allTrips.reduce((s,t)=>s+t.km,0),'Importe (€)':allTrips.reduce((s,t)=>s+t.importe,0)});
+  const wsSum=XLSX.utils.json_to_sheet(sumRows);
+  wsSum['!cols']=[{wch:14},{wch:12},{wch:12},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsSum,'Resumen');
+  XLSX.writeFile(wb,'Gastos_Transporte_2026_Completo.xlsx');
   toast('Excel completo exportado ✓');
 }
 
-// ── Formatters ─────────────────────────────────────────────────────────────
-function fmt(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
-function fmtKm(n) { return n.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1}); }
-function fmtDate(iso) {
-  const [y,m,d] = iso.split('-');
-  return `${d}/${m}/${y}`;
+// ── Formatters ─────────────────────────────────────────────────────────────────
+const fmt    = n => n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const fmtKm  = n => n.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmtDate= iso => { const[y,m,d]=iso.split('-'); return`${d}/${m}/${y}`; };
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+function toast(msg,isErr=false) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=(isErr?'err ':'')+'show';
+  setTimeout(()=>el.className='',2300);
 }
 
-// ── Toast ──────────────────────────────────────────────────────────────────
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
-}
-
-// ── Init ───────────────────────────────────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────────────────────────
 renderHome();
 </script>
 </body>

@@ -470,10 +470,10 @@ function renderTripList() {
   const justs=getJusts();
   if(!mt.length){ list.innerHTML='<div class="empty-state">Sin trayectos este mes</div>'; return; }
   list.innerHTML=mt.map(t=>{
-    const hasJust=!!(justs[t.id]&&(justs[t.id].just||justs[t.id].park||justs[t.id].maps?.length));
+    const hasJust=!!(justs[t.id]&&justs[t.id].done);
     const badge=hasJust
-      ?`<span class="just-badge done">📄 Justificante ✓</span>`
-      :`<span class="just-badge pending">📄 Sin justificante</span>`;
+      ?`<span class="just-badge done">📄 ✓</span>`
+      :`<span class="just-badge pending">📄 —</span>`;
     return `<div class="trip-card">
       <div class="tc-top">
         <div class="tc-main">
@@ -482,15 +482,21 @@ function renderTripList() {
           <div class="tc-motive">${t.motivo}</div>
         </div>
         <div class="tc-right">
-          <div class="tc-amount">${fmt(t.importe)}</div>
-          <div class="tc-km">${fmtKm(t.km)} km</div>
+          <div class="tc-amount" id="amt-${t.id}">${fmt(t.importe)}</div>
+          <div class="tc-km" style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
+            <input type="number" 
+              style="width:54px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 5px;color:var(--text);font-size:12px;text-align:right"
+              value="${t.km}" min="0" step="0.1"
+              onchange="updateKm(${t.id}, this.value)"
+            > km
+          </div>
         </div>
         <button class="del-btn" onclick="deleteTrip(${t.id})">×</button>
       </div>
       <div class="tc-actions">
         ${badge}
         <button class="btn btn-orange btn-sm" style="flex:0 0 auto;width:auto;padding:6px 14px" onclick="goJust(${t.id})">
-          ${hasJust?'✏️ Editar':'📄 Justificante'}
+          ${hasJust?'✏️':'📄'} Just.
         </button>
       </div>
     </div>`;
@@ -501,8 +507,8 @@ function renderTripList() {
 function goJust(tripId) {
   justTripId=tripId;
   const trip=getTrips().find(t=>t.id===tripId);
-  const saved=getJusts()[tripId]||{};
-  justDocs={ just:saved.just||null, park:saved.park||null, maps:[...(saved.maps||[])] };
+  // Images not persisted, always start fresh
+  justDocs = { just: null, park: null, maps: [] };
 
   // Determine sentido heuristically: if destino===Casa → vuelta, else ida
   const sentido = trip.destino==='Casa'?'vuelta':'ida';
@@ -706,9 +712,12 @@ function removeMap(i) {
 }
 
 function saveJustDraft() {
-  const justs=getJusts();
-  justs[justTripId]={ just:justDocs.just, park:justDocs.park, maps:justDocs.maps };
+  // Only save the flag, not the images (images stay in memory only)
+  const justs = getJusts();
+  justs[justTripId] = { done: true };
   saveJusts(justs);
+  // Clear in-memory docs so they don't re-appear
+  justDocs = { just: null, park: null, maps: [] };
 }
 
 // ── Preview & PDF ──────────────────────────────────────────────────────────────
@@ -731,57 +740,99 @@ function goJustPreview() {
 }
 
 async function savePDF() {
-  const pages=[];
-  if(justDocs.just) pages.push(justDocs.just);
-  if(justDocs.park) pages.push(justDocs.park);
-  justDocs.maps.forEach(src=>pages.push(src));
-  if(!pages.length){ toast('Sin páginas',true); return; }
+  const pages = [];
+  if (justDocs.just) pages.push(justDocs.just);
+  if (justDocs.park) pages.push(justDocs.park);
+  justDocs.maps.forEach(src => pages.push(src));
+  if (!pages.length) { toast('Sin páginas', true); return; }
 
-  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const W=210,H=297;
-  for(let i=0;i<pages.length;i++){
-    if(i>0) pdf.addPage();
-    await new Promise(resolve=>{
-      const img=new Image();
-      img.onload=()=>{
-        const ratio=img.width/img.height;
-        let iw,ih;
-        if(ratio>W/H){iw=W;ih=W/ratio;}else{ih=H;iw=H*ratio;}
-        pdf.addImage(pages[i],pages[i].startsWith('data:image/png')?'PNG':'JPEG',(W-iw)/2,(H-ih)/2,iw,ih);
-        resolve();
-      };
-      img.src=pages[i];
-    });
-  }
+  try {
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, H = 297, MARGIN = 8;
+    const AW = W - MARGIN*2, AH = H - MARGIN*2;
 
-  const filename=document.getElementById('p-filename').value.trim()||'justificante.pdf';
-  const blob=pdf.output('blob');
-
-  if(window.showSaveFilePicker){
-    try{
-      const handle=await window.showSaveFilePicker({
-        suggestedName:filename,
-        types:[{description:'PDF',accept:{'application/pdf':['.pdf']}}]
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage();
+      const src = pages[i];
+      await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const ratio = img.width / img.height;
+            let iw, ih;
+            if (ratio > AW / AH) { iw = AW; ih = AW / ratio; }
+            else                  { ih = AH; iw = AH * ratio; }
+            const x = MARGIN + (AW - iw) / 2;
+            const y = MARGIN + (AH - ih) / 2;
+            // Convert to canvas to get clean JPEG regardless of source format
+            const cv = document.createElement('canvas');
+            cv.width = img.width; cv.height = img.height;
+            const cx = cv.getContext('2d');
+            cx.fillStyle = '#ffffff';
+            cx.fillRect(0, 0, cv.width, cv.height);
+            cx.drawImage(img, 0, 0);
+            const jpegData = cv.toDataURL('image/jpeg', 0.85);
+            pdf.addImage(jpegData, 'JPEG', x, y, iw, ih);
+            resolve();
+          } catch(e) { reject(e); }
+        };
+        img.onerror = reject;
+        img.src = src;
       });
-      const w=await handle.createWritable();
-      await w.write(blob); await w.close();
-      // mark as done
-      saveJustDraft();
-      renderTripList();
-      toast('PDF guardado ✓');
-      setTimeout(()=>show('month-screen'),1000);
-      return;
-    } catch(e){ if(e.name==='AbortError') return; }
+    }
+
+    const filename = (document.getElementById('p-filename').value.trim() || 'justificante') + '';
+    const finalName = filename.endsWith('.pdf') ? filename : filename + '.pdf';
+    const blob = pdf.output('blob');
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: finalName,
+          types: [{ description: 'PDF', accept: { 'application/pdf': ['.pdf'] } }]
+        });
+        const w = await handle.createWritable();
+        await w.write(blob);
+        await w.close();
+        saveJustDraft();
+        renderTripList();
+        toast('PDF guardado ✓');
+        setTimeout(() => show('month-screen'), 1000);
+        return;
+      } catch(e) { if (e.name === 'AbortError') return; }
+    }
+    // Fallback download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = finalName;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    saveJustDraft();
+    renderTripList();
+    toast('PDF descargado ✓');
+    setTimeout(() => show('month-screen'), 1000);
+  } catch(err) {
+    console.error('PDF error:', err);
+    toast('Error al generar PDF: ' + err.message, true);
   }
-  // fallback
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),3000);
-  saveJustDraft(); renderTripList();
-  toast('PDF descargado ✓');
-  setTimeout(()=>show('month-screen'),1000);
+}
+
+// ── Edit km inline ────────────────────────────────────────────────────────────────
+function updateKm(id, val) {
+  const km = parseFloat(val);
+  if (isNaN(km) || km <= 0) return;
+  const trips = getTrips();
+  const idx = trips.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  trips[idx].km = km;
+  trips[idx].importe = Math.round(km * trips[idx].rate * 100) / 100;
+  saveTrips(trips);
+  // Update amount label without full re-render
+  const amtEl = document.getElementById('amt-' + id);
+  if (amtEl) amtEl.textContent = fmt(trips[idx].importe);
+  renderMonthSummary();
+  renderHome();
 }
 
 // ── Config ─────────────────────────────────────────────────────────────────────

@@ -1,0 +1,280 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://asanmont.github.io/gastos-transporte/gastos-transporte.html
+Subject: Gastos Transporte
+Date: Thu, 2 Jul 2026 12:51:32 +0200
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--JivVfkiYXSBBpETv0J6580o3JeffoqdOZHMT2ws0yV----"
+
+
+------MultipartBoundary--JivVfkiYXSBBpETv0J6580o3JeffoqdOZHMT2ws0yV----
+Content-Type: text/html
+Content-ID: <frame-CEF6880C6A1AFB0F1939292A4F968966@mhtml.blink>
+Content-Transfer-Encoding: binary
+Content-Location: https://asanmont.github.io/gastos-transporte/gastos-transporte.html
+
+<!DOCTYPE html><html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><link rel="stylesheet" type="text/css" href="cid:css-5e084188-5f2b-4cf3-a6fb-6af6d452e904@mhtml.blink" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Gastos Transporte</title>
+
+</head>
+<body>
+
+<!-- ══ HOME ══════════════════════════════════════════════════════════════ -->
+<div id="home" class="screen">
+  <div class="topbar">
+    <h1>🚗 Gastos Transporte</h1>
+    <button class="icon-btn">⚙️</button>
+  </div>
+  <div class="content">
+    <div class="total-card">
+      <div class="t-label">Total acumulado 2026 · Pulsa para exportar Excel</div>
+      <div class="t-amount" id="home-total">0,00 €</div>
+      <div class="t-trips" id="home-trips">0 trayectos · 0,0 km</div>
+    </div>
+    <div class="month-grid" id="month-grid"><div class="month-card">
+      <div class="m-name">Junio</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div><div class="month-card">
+      <div class="m-name">Julio</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div><div class="month-card">
+      <div class="m-name">Agosto</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div><div class="month-card">
+      <div class="m-name">Septiembre</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div><div class="month-card">
+      <div class="m-name">Octubre</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div><div class="month-card">
+      <div class="m-name">Noviembre</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div><div class="month-card">
+      <div class="m-name">Diciembre</div>
+      <div class="m-stats">0 trayectos · 0,0 km</div>
+      <div class="m-total">0,00 €</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ MES ════════════════════════════════════════════════════════════════ -->
+<div id="month-screen" class="screen active">
+  <div class="topbar">
+    <button class="back">‹</button>
+    <h1 id="month-title">Junio 2026</h1>
+    <button class="icon-btn">📥</button>
+  </div>
+  <div class="content">
+    <div class="month-summary">
+      <div>
+        <div class="ms-label">Total mes</div>
+        <div class="ms-val" id="month-total-val">0,00 €</div>
+        <div class="ms-sub" id="month-km-val">0,0 km · 0 trayectos</div>
+      </div>
+    </div>
+
+    <!-- Nuevo trayecto -->
+    <div class="form-card">
+      <h3>Nuevo trayecto</h3>
+      <div class="form-subtitle">Introduce un trayecto por registro</div>
+
+      <div class="field-label">Fecha</div>
+      <input type="date" id="f-date" class="text-input" style="margin-top:0">
+
+      <div class="field-label">Origen</div>
+      <div class="sel-grid cols2" id="grid-origen"><button class="sel-btn">Casa</button><button class="sel-btn">Homebox Sevilla</button><button class="sel-btn">Zebrabox Sevilla</button><button class="sel-btn">Medihp Tomares</button><button class="sel-btn">Medihp Sevilla</button><button class="sel-btn">Viamed Fátima</button><button class="sel-btn">Clínica Osten</button><button class="sel-btn">Fremap Mutua Trabajo</button><button class="sel-btn">Centro Salud Mairena</button><button class="sel-btn">Despacho Abogados</button><button class="sel-btn">Otros</button></div>
+      <input type="text" id="f-origen-otro" class="text-input" placeholder="Especifica origen..." style="display:none">
+
+      <div class="field-label">Destino</div>
+      <div class="sel-grid cols2" id="grid-destino"><button class="sel-btn">Casa</button><button class="sel-btn">Homebox Sevilla</button><button class="sel-btn">Zebrabox Sevilla</button><button class="sel-btn">Medihp Tomares</button><button class="sel-btn">Medihp Sevilla</button><button class="sel-btn">Viamed Fátima</button><button class="sel-btn">Clínica Osten</button><button class="sel-btn">Fremap Mutua Trabajo</button><button class="sel-btn">Centro Salud Mairena</button><button class="sel-btn">Despacho Abogados</button><button class="sel-btn">Otros</button></div>
+      <input type="text" id="f-destino-otro" class="text-input" placeholder="Especifica destino..." style="display:none">
+
+      <div class="field-label">Motivo</div>
+      <div class="sel-grid cols2" id="grid-motivo"><button class="sel-btn">Rehabilitación</button><button class="sel-btn">Consulta Rehabilitador</button><button class="sel-btn">Consulta Psiquiatra</button><button class="sel-btn">Consulta Psicólogo</button><button class="sel-btn">Consulta Traumatólogo</button><button class="sel-btn">Pruebas Médicas</button><button class="sel-btn">Peritaje MMA</button><button class="sel-btn">Peritaje Propio</button><button class="sel-btn">Reunión Abogados</button><button class="sel-btn">Otros</button></div>
+      <input type="text" id="f-motivo-otro" class="text-input" placeholder="Especifica motivo..." style="display:none">
+
+      <div class="field-label">Kilómetros</div>
+      <input type="number" id="f-km" class="text-input" placeholder="km (se completa auto desde config)" min="0" step="0.1" style="margin-top:0">
+
+      <div style="margin-top:16px">
+        <button class="btn btn-primary">Añadir trayecto</button>
+      </div>
+    </div>
+
+    <div class="trip-list" id="trip-list"><div class="empty-state">Sin trayectos registrados este mes</div></div>
+  </div>
+</div>
+
+<!-- ══ CONFIG ═════════════════════════════════════════════════════════════ -->
+<div id="config-screen" class="screen">
+  <div class="topbar">
+    <button class="back">‹</button>
+    <h1>Configuración</h1>
+    <button class="icon-btn">💾</button>
+  </div>
+  <div class="content">
+    <div class="config-section">
+      <h3>Tarifa €/km (AEAT 2026)</h3>
+      <div class="km-row">
+        <label>Importe por kilómetro</label>
+        <input type="number" id="cfg-rate" class="km-input" step="0.01" value="0.26">
+      </div>
+    </div>
+    <div class="config-section">
+      <h3>Distancias por trayecto (km)</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Los pares simétricos se rellenan automáticamente. Deja en 0 los trayectos que no uses.</p>
+      <div id="km-pairs"></div>
+    </div>
+    <button class="btn btn-green">Guardar configuración</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+
+
+
+
+</body></html>
+------MultipartBoundary--JivVfkiYXSBBpETv0J6580o3JeffoqdOZHMT2ws0yV----
+Content-Type: text/css
+Content-Transfer-Encoding: binary
+Content-Location: cid:css-5e084188-5f2b-4cf3-a6fb-6af6d452e904@mhtml.blink
+
+@charset "utf-8";
+
+:root { --bg: #0f1117; --surface: #1a1d27; --surface2: #232634; --border: #2e3347; --accent: #4f8ef7; --accent2: #7c5cbf; --green: #3dbe7a; --red: #e05555; --text: #e8eaf0; --text2: #8b90a7; --text3: #5a5f78; --radius: 12px; --radius-sm: 8px; }
+
+* { box-sizing: border-box; margin: 0px; padding: 0px; -webkit-tap-highlight-color: transparent; }
+
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+
+.screen.active { display: flex; }
+
+.topbar { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0px; z-index: 10; }
+
+.topbar h1 { font-size: 17px; font-weight: 600; flex: 1 1 0%; }
+
+.topbar .back { background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; color: var(--accent); font-size: 22px; cursor: pointer; padding: 4px 8px 4px 0px; }
+
+.topbar .icon-btn { background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; color: var(--text2); font-size: 22px; cursor: pointer; padding: 4px; }
+
+.content { flex: 1 1 0%; padding: 16px; overflow-y: auto; }
+
+.month-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+.month-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 16px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+
+.month-card:active { background: var(--surface2); }
+
+.month-card .m-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+
+.month-card .m-stats { font-size: 12px; color: var(--text2); }
+
+.month-card .m-total { font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 8px; }
+
+.total-card { background: linear-gradient(135deg, var(--accent2), var(--accent)); border-radius: var(--radius); padding: 20px; cursor: pointer; margin-bottom: 12px; }
+
+.total-card .t-label { font-size: 13px; opacity: 0.8; margin-bottom: 4px; }
+
+.total-card .t-amount { font-size: 28px; font-weight: 700; }
+
+.total-card .t-trips { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+.btn { display: block; width: 100%; padding: 14px; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+
+.btn:active { opacity: 0.75; }
+
+.btn-primary { background: var(--accent); color: rgb(255, 255, 255); }
+
+.btn-green { background: var(--green); color: rgb(255, 255, 255); }
+
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+
+.btn-danger { background: var(--red); color: rgb(255, 255, 255); }
+
+.btn-row { display: flex; gap: 10px; }
+
+.btn-row .btn { flex: 1 1 0%; }
+
+.field-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; margin-top: 16px; }
+
+.sel-grid { display: grid; gap: 8px; }
+
+.sel-grid.cols2 { grid-template-columns: 1fr 1fr; }
+
+.sel-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.sel-btn { padding: 10px 8px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--text2); cursor: pointer; text-align: center; line-height: 1.3; transition: 0.15s; }
+
+.sel-btn:active { opacity: 0.7; }
+
+.sel-btn.selected { border-color: var(--accent); background: rgba(79, 142, 247, 0.15); color: var(--text); }
+
+.text-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; color: var(--text); font-size: 14px; margin-top: 8px; outline: none; }
+
+.text-input:focus { border-color: var(--accent); }
+
+.trip-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+.trip-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; align-items: flex-start; gap: 12px; }
+
+.trip-card .tc-main { flex: 1 1 0%; min-width: 0px; }
+
+.trip-card .tc-date { font-size: 12px; color: var(--text2); margin-bottom: 3px; }
+
+.trip-card .tc-route { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.trip-card .tc-motive { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.trip-card .tc-amount { font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+.trip-card .tc-km { font-size: 11px; color: var(--text3); text-align: right; }
+
+.trip-card .del-btn { background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; color: var(--text3); font-size: 20px; cursor: pointer; padding: 0px 2px; line-height: 1; flex-shrink: 0; }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text3); font-size: 14px; }
+
+.month-summary { background: var(--surface2); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+.ms-label { font-size: 12px; color: var(--text2); }
+
+.ms-val { font-size: 20px; font-weight: 700; color: var(--accent); }
+
+.ms-sub { font-size: 11px; color: var(--text3); }
+
+.config-section { margin-bottom: 24px; }
+
+.config-section h3 { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+
+.km-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+
+.km-row label { flex: 1 1 0%; font-size: 13px; color: var(--text2); line-height: 1.3; }
+
+.km-input { width: 72px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--text); font-size: 14px; text-align: right; outline: none; flex-shrink: 0; }
+
+.km-input:focus { border-color: var(--accent); }
+
+.divider { height: 1px; background: var(--border); margin: 20px 0px; }
+
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: rgb(255, 255, 255); padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0px); }
+
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+
+.form-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+
+.form-card .form-subtitle { font-size: 12px; color: var(--text2); margin-bottom: 0px; }
+------MultipartBoundary--JivVfkiYXSBBpETv0J6580o3JeffoqdOZHMT2ws0yV------

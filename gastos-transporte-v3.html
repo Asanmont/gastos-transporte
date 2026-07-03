@@ -212,6 +212,9 @@ canvas { display: none; }
       <div class="field-label">Kilómetros</div>
       <input type="number" id="f-km" class="text-input" placeholder="km (auto desde config)" min="0" step="0.1" style="margin-top:0">
 
+      <div class="field-label">Importe parking (€) <span style="font-weight:400;text-transform:none;color:var(--text3)">— opcional</span></div>
+      <input type="number" id="f-parking" class="text-input" placeholder="0,00" min="0" step="0.01" style="margin-top:0">
+
       <div style="margin-top:16px; display:flex; gap:8px;">
         <button class="btn btn-primary" style="flex:1" onclick="addTrip()">Añadir trayecto</button>
       </div>
@@ -361,6 +364,7 @@ function goMonth(m) {
   const today=new Date();
   document.getElementById('f-date').value=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   document.getElementById('f-km').value='';
+  document.getElementById('f-parking').value='';
   ['f-origen-otro','f-destino-otro','f-motivo-otro'].forEach(id=>document.getElementById(id).style.display='none');
   renderSelectorGrid('grid-origen',LUGARES,'origen');
   renderSelectorGrid('grid-destino',LUGARES,'destino');
@@ -415,13 +419,15 @@ function addTrip() {
 
   const rate=getRate();
   const importe=Math.round(km*rate*100)/100;
+  const parking = parseFloat(document.getElementById('f-parking').value || 0) || 0;
   const trips=getTrips();
-  trips.push({ id:Date.now(), month:currentMonth, date, origen:origenFinal, destino:destinoFinal, motivo:motivoFinal, km, rate, importe });
+  trips.push({ id:Date.now(), month:currentMonth, date, origen:origenFinal, destino:destinoFinal, motivo:motivoFinal, km, rate, importe, parking });
   saveTrips(trips);
 
   selOrigen=null; selDestino=null; selMotivo=null;
   document.querySelectorAll('.sel-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('f-km').value='';
+  document.getElementById('f-parking').value='';
   ['f-origen-otro','f-destino-otro','f-motivo-otro'].forEach(id=>document.getElementById(id).style.display='none');
   renderTripList(); renderMonthSummary(); renderHome();
   toast('Trayecto añadido ✓');
@@ -479,7 +485,7 @@ function renderTripList() {
         <div class="tc-main">
           <div class="tc-date">${fmtDate(t.date)}</div>
           <div class="tc-route">${t.origen} → ${t.destino}</div>
-          <div class="tc-motive">${t.motivo}</div>
+          <div class="tc-motive">${t.motivo}${t.parking>0?' · 🅿️ '+fmt(t.parking):''}</div>
         </div>
         <div class="tc-right">
           <div class="tc-amount" id="amt-${t.id}">${fmt(t.importe)}</div>
@@ -895,7 +901,7 @@ function saveConfig() {
 
 // ── Export ─────────────────────────────────────────────────────────────────────
 function tripsToRows(trips) {
-  return trips.map(t=>({'Fecha':fmtDate(t.date),'Origen':t.origen,'Destino':t.destino,'Motivo':t.motivo,'Km':t.km,'€/km':t.rate,'Importe (€)':t.importe}));
+  return trips.map(t=>({'Fecha':fmtDate(t.date),'Origen':t.origen,'Destino':t.destino,'Motivo':t.motivo,'Km':t.km,'€/km':t.rate,'Km (€)':t.importe,'Parking (€)':t.parking||0,'Total (€)':(t.importe+(t.parking||0))}));
 }
 
 function exportMonth() {
@@ -904,7 +910,7 @@ function exportMonth() {
   const rows=tripsToRows(trips);
   rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)});
   const ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
+  ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:12},{wch:12},{wch:12}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,MONTHS[currentMonth]);
   XLSX.writeFile(wb,`Gastos_Transporte_${MONTHS[currentMonth]}_2026.xlsx`);
@@ -921,7 +927,7 @@ function exportAll() {
     const rows=tripsToRows(trips);
     rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)});
     const ws=XLSX.utils.json_to_sheet(rows);
-    ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:14}];
+    ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:12},{wch:12},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws,MONTHS[m]);
   });
   const sumRows=ACTIVE_MONTHS.map(m=>{

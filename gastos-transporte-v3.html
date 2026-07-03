@@ -788,7 +788,6 @@ async function savePDF() {
   toast('Generando PDF…');
 
   try {
-    // 1. Pre-load all images
     const loadedImages = await Promise.all(pages.map(src => new Promise((resolve, reject) => {
       const img = new Image();
       img.onload  = () => resolve(img);
@@ -796,7 +795,6 @@ async function savePDF() {
       img.src = src;
     })));
 
-    // 2. Build PDF
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210, H = 297, MARGIN = 8;
     const AW = W - MARGIN * 2, AH = H - MARGIN * 2;
@@ -819,81 +817,26 @@ async function savePDF() {
       pdf.addImage(jpegData, 'JPEG', MARGIN + (AW-iw)/2, MARGIN + (AH-ih)/2, iw, ih);
     }
 
-    // 3. Build blob
     const blob = pdf.output('blob');
     if (!blob || blob.size < 500) throw new Error('PDF vacío');
 
-    // 4. Open in Chrome's native PDF viewer via blob URL
-    // The user then uses Chrome's own download button (top-right) to save where they want
-    // This bypasses the showSaveFilePicker bug on Chrome Android with remote origins
-    const blobUrl = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = finalName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
 
-    // Store name so we can show it
-    sessionStorage.setItem('pendingPdfName', finalName);
-    sessionStorage.setItem('pendingPdfUrl', blobUrl);
-
-    // Open PDF viewer in same tab (back button returns to app)
-    // Use an overlay instead so user can still name the file
-    showPdfSaveOverlay(blobUrl, finalName, blob);
+    saveJustDraft();
+    renderTripList();
+    toast('PDF guardado en Descargas ✓');
+    show('month-screen');
 
   } catch(err) {
     console.error('PDF error:', err);
     toast('Error: ' + err.message, true);
-  }
-}
-
-function showPdfSaveOverlay(blobUrl, filename, blob) {
-  // Remove existing overlay if any
-  const existing = document.getElementById('pdf-overlay');
-  if (existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'pdf-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;';
-  overlay.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--surface);border-bottom:1px solid var(--border)">
-      <button onclick="closePdfOverlay()" style="background:none;border:none;color:var(--accent);font-size:22px;cursor:pointer;padding:2px 8px 2px 0">‹</button>
-      <span style="font-size:16px;font-weight:700;flex:1">Vista previa PDF</span>
-    </div>
-    <iframe id="pdf-frame" src="${blobUrl}" style="flex:1;width:100%;border:none;background:#525659"></iframe>
-    <div style="padding:14px 16px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px">
-      <div style="font-size:12px;color:var(--text2)">📁 ${filename}</div>
-      <div style="display:flex;gap:8px">
-        <a href="${blobUrl}" download="${filename}" 
-           onclick="onPdfDownload()"
-           style="flex:1;background:var(--green);color:#fff;padding:14px;border-radius:8px;text-align:center;font-size:15px;font-weight:700;text-decoration:none">
-          💾 Descargar PDF
-        </a>
-        <button onclick="closePdfOverlay()" 
-           style="flex:0 0 auto;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:14px 16px;border-radius:8px;font-size:13px;cursor:pointer">
-          Cancelar
-        </button>
-      </div>
-      <div style="font-size:11px;color:var(--text3);text-align:center">
-        Mantén pulsado "Descargar PDF" para elegir carpeta de destino
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-}
-
-function onPdfDownload() {
-  saveJustDraft();
-  renderTripList();
-  toast('PDF guardado ✓');
-  setTimeout(() => {
-    closePdfOverlay();
-    show('month-screen');
-  }, 800);
-}
-
-function closePdfOverlay() {
-  const overlay = document.getElementById('pdf-overlay');
-  if (overlay) {
-    // Revoke blob URL
-    const iframe = overlay.querySelector('#pdf-frame');
-    if (iframe) URL.revokeObjectURL(iframe.src);
-    overlay.remove();
   }
 }
 

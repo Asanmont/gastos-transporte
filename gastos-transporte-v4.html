@@ -785,16 +785,19 @@ async function savePDF() {
   const filename = (document.getElementById('p-filename').value.trim() || 'justificante');
   const finalName = filename.endsWith('.pdf') ? filename : filename + '.pdf';
 
+  // Show progress
+  toast('Generando PDF…');
+
   try {
-    // Pre-load all images first, completely, before touching jsPDF
+    // 1. Pre-load all images
     const loadedImages = await Promise.all(pages.map(src => new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('No se pudo cargar imagen'));
+      img.onload  = () => resolve(img);
+      img.onerror = () => reject(new Error('Error cargando imagen'));
       img.src = src;
     })));
 
-    // Now build PDF synchronously from already-loaded images
+    // 2. Build PDF
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210, H = 297, MARGIN = 8;
     const AW = W - MARGIN * 2, AH = H - MARGIN * 2;
@@ -806,61 +809,59 @@ async function savePDF() {
       let iw, ih;
       if (ratio > AW / AH) { iw = AW; ih = AW / ratio; }
       else                  { ih = AH; iw = AH * ratio; }
-      const x = MARGIN + (AW - iw) / 2;
-      const y = MARGIN + (AH - ih) / 2;
-
-      // Draw to canvas to normalize to JPEG
       const cv = document.createElement('canvas');
-      cv.width = img.naturalWidth;
-      cv.height = img.naturalHeight;
+      cv.width = img.naturalWidth; cv.height = img.naturalHeight;
       const cx = cv.getContext('2d');
       cx.fillStyle = '#ffffff';
       cx.fillRect(0, 0, cv.width, cv.height);
       cx.drawImage(img, 0, 0);
-      // Wait for canvas to be ready
       const jpegData = cv.toDataURL('image/jpeg', 0.88);
-      if (!jpegData || jpegData.length < 100) throw new Error('Canvas vacío en página ' + (i+1));
-      pdf.addImage(jpegData, 'JPEG', x, y, iw, ih);
+      if (!jpegData || jpegData.length < 200) throw new Error('Imagen vacía en pág.' + (i+1));
+      pdf.addImage(jpegData, 'JPEG', MARGIN + (AW-iw)/2, MARGIN + (AH-ih)/2, iw, ih);
     }
 
-    // Get PDF as Uint8Array — most reliable format for both file picker and download
-    const pdfArrayBuffer = pdf.output('arraybuffer');
-    if (!pdfArrayBuffer || pdfArrayBuffer.byteLength < 500) throw new Error('PDF generado vacío');
+    // 3. Get data URI (base64) — most compatible output for Chrome Android
+    const pdfDataUri = pdf.output('datauristring');
+    // Convert base64 to Uint8Array
+    const base64 = pdfDataUri.split(',')[1];
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    if (bytes.length < 500) throw new Error('PDF vacío (' + bytes.length + ' bytes)');
 
+    // 4. Try showSaveFilePicker with a single clean call
     if (window.showSaveFilePicker) {
       try {
         const handle = await window.showSaveFilePicker({
           suggestedName: finalName,
-          types: [{ description: 'PDF', accept: { 'application/pdf': ['.pdf'] } }]
+          types: [{ description: 'Documento PDF', accept: { 'application/pdf': ['.pdf'] } }],
+          excludeAcceptAllOption: false,
         });
-        const w = await handle.createWritable();
-        // Write as Uint8Array — avoids blob streaming issues on Chrome Android
-        await w.write(new Uint8Array(pdfArrayBuffer));
-        await w.close();
+        const writable = await handle.createWritable();
+        await writable.write({ type: 'write', data: bytes.buffer });
+        await writable.close();
         saveJustDraft();
         renderTripList();
         toast('PDF guardado ✓');
         show('month-screen');
         return;
       } catch(e) {
-        if (e.name === 'AbortError') return;
-        // Fall through to download fallback
+        if (e.name === 'AbortError') return; // usuario canceló
+        console.warn('showSaveFilePicker falló, usando descarga:', e);
+        // fall through to download
       }
     }
 
-    // Fallback: Blob download
-    const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+    // 5. Fallback: download to Descargas
+    const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = finalName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 8000);
+    a.href = url; a.download = finalName;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
     saveJustDraft();
     renderTripList();
-    toast('PDF descargado ✓');
+    toast('PDF en Descargas ✓');
     show('month-screen');
 
   } catch(err) {

@@ -448,13 +448,13 @@ function monthTrips(m) {
 // ── Render ─────────────────────────────────────────────────────────────────────
 function renderHome() {
   const trips=getTrips();
-  const total=trips.reduce((s,t)=>s+t.importe,0);
+  const total=trips.reduce((s,t)=>s+t.importe+(t.parking||0),0);
   const totalKm=trips.reduce((s,t)=>s+t.km,0);
   document.getElementById('home-total').textContent=fmt(total);
   document.getElementById('home-trips').textContent=`${trips.length} trayectos · ${fmtKm(totalKm)} km`;
   document.getElementById('month-grid').innerHTML=ACTIVE_MONTHS.map(m=>{
     const mt=monthTrips(m);
-    const mTotal=mt.reduce((s,t)=>s+t.importe,0);
+    const mTotal=mt.reduce((s,t)=>s+t.importe+(t.parking||0),0);
     const mKm=mt.reduce((s,t)=>s+t.km,0);
     return `<div class="month-card" onclick="goMonth(${m})">
       <div class="m-name">${MONTHS[m]}</div>
@@ -466,8 +466,8 @@ function renderHome() {
 
 function renderMonthSummary() {
   const mt=monthTrips(currentMonth);
-  document.getElementById('month-total-val').textContent=fmt(mt.reduce((s,t)=>s+t.importe,0));
-  document.getElementById('month-km-val').textContent=`${fmtKm(mt.reduce((s,t)=>s+t.km,0))} km · ${mt.length} trayectos`;
+  document.getElementById('month-total-val').textContent=fmt(mt.reduce((s,t)=>s+t.importe+(t.parking||0),0));
+  const mPark=mt.reduce((s,t)=>s+(t.parking||0),0); document.getElementById('month-km-val').textContent=`${fmtKm(mt.reduce((s,t)=>s+t.km,0))} km${mPark>0?' · 🅿️ '+fmt(mPark):''} · ${mt.length} trayectos`;
 }
 
 function renderTripList() {
@@ -488,7 +488,7 @@ function renderTripList() {
           <div class="tc-motive">${t.motivo}${t.parking>0?' · 🅿️ '+fmt(t.parking):''}</div>
         </div>
         <div class="tc-right">
-          <div class="tc-amount" id="amt-${t.id}">${fmt(t.importe)}</div>
+          <div class="tc-amount" id="amt-${t.id}">${fmt(t.importe+(t.parking||0))}</div>
           <div class="tc-km" style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
             <input type="number" 
               style="width:54px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 5px;color:var(--text);font-size:12px;text-align:right"
@@ -908,7 +908,7 @@ function exportMonth() {
   const trips=monthTrips(currentMonth);
   if(!trips.length){toast('Sin trayectos');return;}
   const rows=tripsToRows(trips);
-  rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)});
+  rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Km (€)':trips.reduce((s,t)=>s+t.importe,0),'Parking (€)':trips.reduce((s,t)=>s+(t.parking||0),0),'Total (€)':trips.reduce((s,t)=>s+t.importe+(t.parking||0),0)});
   const ws=XLSX.utils.json_to_sheet(rows);
   ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:12},{wch:12},{wch:12}];
   const wb=XLSX.utils.book_new();
@@ -925,7 +925,7 @@ function exportAll() {
     const trips=allTrips.filter(t=>t.month===m);
     if(!trips.length) return;
     const rows=tripsToRows(trips);
-    rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)});
+    rows.push({},{'Fecha':'TOTAL','Km':trips.reduce((s,t)=>s+t.km,0),'Km (€)':trips.reduce((s,t)=>s+t.importe,0),'Parking (€)':trips.reduce((s,t)=>s+(t.parking||0),0),'Total (€)':trips.reduce((s,t)=>s+t.importe+(t.parking||0),0)});
     const ws=XLSX.utils.json_to_sheet(rows);
     ws['!cols']=[{wch:12},{wch:22},{wch:22},{wch:22},{wch:8},{wch:8},{wch:12},{wch:12},{wch:12}];
     XLSX.utils.book_append_sheet(wb,ws,MONTHS[m]);
@@ -933,9 +933,9 @@ function exportAll() {
   const sumRows=ACTIVE_MONTHS.map(m=>{
     const trips=allTrips.filter(t=>t.month===m);
     if(!trips.length) return null;
-    return{'Mes':MONTHS[m],'Trayectos':trips.length,'Km totales':trips.reduce((s,t)=>s+t.km,0),'Importe (€)':trips.reduce((s,t)=>s+t.importe,0)};
+    return{'Mes':MONTHS[m],'Trayectos':trips.length,'Km totales':trips.reduce((s,t)=>s+t.km,0),'Km (€)':trips.reduce((s,t)=>s+t.importe,0),'Parking (€)':trips.reduce((s,t)=>s+(t.parking||0),0),'Total (€)':trips.reduce((s,t)=>s+t.importe+(t.parking||0),0)};
   }).filter(Boolean);
-  sumRows.push({},{'Mes':'TOTAL','Trayectos':allTrips.length,'Km totales':allTrips.reduce((s,t)=>s+t.km,0),'Importe (€)':allTrips.reduce((s,t)=>s+t.importe,0)});
+  sumRows.push({},{'Mes':'TOTAL','Trayectos':allTrips.length,'Km totales':allTrips.reduce((s,t)=>s+t.km,0),'Km (€)':allTrips.reduce((s,t)=>s+t.importe,0),'Parking (€)':allTrips.reduce((s,t)=>s+(t.parking||0),0),'Total (€)':allTrips.reduce((s,t)=>s+t.importe+(t.parking||0),0)});
   const wsSum=XLSX.utils.json_to_sheet(sumRows);
   wsSum['!cols']=[{wch:14},{wch:12},{wch:12},{wch:14}];
   XLSX.utils.book_append_sheet(wb,wsSum,'Resumen');

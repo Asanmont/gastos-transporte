@@ -823,11 +823,10 @@ async function savePDF() {
       pdf.addImage(jpegData, 'JPEG', x, y, iw, ih);
     }
 
-    const blob = pdf.output('blob');
-    if (!blob || blob.size < 500) throw new Error('PDF generado vacío');
+    // Get PDF as Uint8Array — most reliable format for both file picker and download
+    const pdfArrayBuffer = pdf.output('arraybuffer');
+    if (!pdfArrayBuffer || pdfArrayBuffer.byteLength < 500) throw new Error('PDF generado vacío');
 
-    // Try showSaveFilePicker — must be called synchronously after user gesture
-    // blob is ready, trigger immediately
     if (window.showSaveFilePicker) {
       try {
         const handle = await window.showSaveFilePicker({
@@ -835,7 +834,8 @@ async function savePDF() {
           types: [{ description: 'PDF', accept: { 'application/pdf': ['.pdf'] } }]
         });
         const w = await handle.createWritable();
-        await w.write(blob);
+        // Write as Uint8Array — avoids blob streaming issues on Chrome Android
+        await w.write(new Uint8Array(pdfArrayBuffer));
         await w.close();
         saveJustDraft();
         renderTripList();
@@ -843,12 +843,13 @@ async function savePDF() {
         show('month-screen');
         return;
       } catch(e) {
-        if (e.name === 'AbortError') return; // user cancelled picker
-        // Other error: fall through to download
+        if (e.name === 'AbortError') return;
+        // Fall through to download fallback
       }
     }
 
-    // Fallback: standard download
+    // Fallback: Blob download
+    const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

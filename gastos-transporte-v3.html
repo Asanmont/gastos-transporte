@@ -779,48 +779,55 @@ async function savePDF() {
   const pages = [];
   if (justDocs.just) pages.push(justDocs.just);
   if (justDocs.park) pages.push(justDocs.park);
-  justDocs.maps.forEach(src => pages.push(src));
+  if (Array.isArray(justDocs.maps)) justDocs.maps.forEach(src => pages.push(src));
   if (!pages.length) { toast('Sin páginas', true); return; }
 
+  const filename = (document.getElementById('p-filename').value.trim() || 'justificante');
+  const finalName = filename.endsWith('.pdf') ? filename : filename + '.pdf';
+
   try {
+    // Pre-load all images first, completely, before touching jsPDF
+    const loadedImages = await Promise.all(pages.map(src => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('No se pudo cargar imagen'));
+      img.src = src;
+    })));
+
+    // Now build PDF synchronously from already-loaded images
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210, H = 297, MARGIN = 8;
-    const AW = W - MARGIN*2, AH = H - MARGIN*2;
+    const AW = W - MARGIN * 2, AH = H - MARGIN * 2;
 
-    for (let i = 0; i < pages.length; i++) {
+    for (let i = 0; i < loadedImages.length; i++) {
       if (i > 0) pdf.addPage();
-      const src = pages[i];
-      await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const ratio = img.width / img.height;
-            let iw, ih;
-            if (ratio > AW / AH) { iw = AW; ih = AW / ratio; }
-            else                  { ih = AH; iw = AH * ratio; }
-            const x = MARGIN + (AW - iw) / 2;
-            const y = MARGIN + (AH - ih) / 2;
-            // Convert to canvas to get clean JPEG regardless of source format
-            const cv = document.createElement('canvas');
-            cv.width = img.width; cv.height = img.height;
-            const cx = cv.getContext('2d');
-            cx.fillStyle = '#ffffff';
-            cx.fillRect(0, 0, cv.width, cv.height);
-            cx.drawImage(img, 0, 0);
-            const jpegData = cv.toDataURL('image/jpeg', 0.85);
-            pdf.addImage(jpegData, 'JPEG', x, y, iw, ih);
-            resolve();
-          } catch(e) { reject(e); }
-        };
-        img.onerror = reject;
-        img.src = src;
-      });
+      const img = loadedImages[i];
+      const ratio = img.naturalWidth / img.naturalHeight;
+      let iw, ih;
+      if (ratio > AW / AH) { iw = AW; ih = AW / ratio; }
+      else                  { ih = AH; iw = AH * ratio; }
+      const x = MARGIN + (AW - iw) / 2;
+      const y = MARGIN + (AH - ih) / 2;
+
+      // Draw to canvas to normalize to JPEG
+      const cv = document.createElement('canvas');
+      cv.width = img.naturalWidth;
+      cv.height = img.naturalHeight;
+      const cx = cv.getContext('2d');
+      cx.fillStyle = '#ffffff';
+      cx.fillRect(0, 0, cv.width, cv.height);
+      cx.drawImage(img, 0, 0);
+      // Wait for canvas to be ready
+      const jpegData = cv.toDataURL('image/jpeg', 0.88);
+      if (!jpegData || jpegData.length < 100) throw new Error('Canvas vacío en página ' + (i+1));
+      pdf.addImage(jpegData, 'JPEG', x, y, iw, ih);
     }
 
-    const filename = (document.getElementById('p-filename').value.trim() || 'justificante') + '';
-    const finalName = filename.endsWith('.pdf') ? filename : filename + '.pdf';
     const blob = pdf.output('blob');
+    if (!blob || blob.size < 500) throw new Error('PDF generado vacío');
 
+    // Try showSaveFilePicker — must be called synchronously after user gesture
+    // blob is ready, trigger immediately
     if (window.showSaveFilePicker) {
       try {
         const handle = await window.showSaveFilePicker({
@@ -833,24 +840,31 @@ async function savePDF() {
         saveJustDraft();
         renderTripList();
         toast('PDF guardado ✓');
-        setTimeout(() => show('month-screen'), 1000);
+        show('month-screen');
         return;
-      } catch(e) { if (e.name === 'AbortError') return; }
+      } catch(e) {
+        if (e.name === 'AbortError') return; // user cancelled picker
+        // Other error: fall through to download
+      }
     }
-    // Fallback download
+
+    // Fallback: standard download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = finalName;
-    document.body.appendChild(a); a.click();
+    a.href = url;
+    a.download = finalName;
+    document.body.appendChild(a);
+    a.click();
     document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    setTimeout(() => URL.revokeObjectURL(url), 8000);
     saveJustDraft();
     renderTripList();
     toast('PDF descargado ✓');
-    setTimeout(() => show('month-screen'), 1000);
+    show('month-screen');
+
   } catch(err) {
     console.error('PDF error:', err);
-    toast('Error al generar PDF: ' + err.message, true);
+    toast('Error: ' + err.message, true);
   }
 }
 
